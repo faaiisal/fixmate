@@ -1,0 +1,100 @@
+{
+  "$schema": "https://design-tokens.github.io/community-group/format/",
+  "name": "FixMate Luminous Minimalist Design Tokens",
+  "version": "1.0.0",
+  "color": {
+    "surface": {
+      "default": { "value": "#FCF9F8", "type": "color", "description": "Master viewport canvas background" },
+      "dim": { "value": "#DCD9D9", "type": "color", "description": "Disabled element surface, low emphasis backdrop" },
+      "bright": { "value": "#FCF9F8", "type": "color", "description": "High-emphasis viewport highlights" },
+      "container": {
+        "lowest": { "value": "#FFFFFF", "type": "color", "description": "Primary elevated card surface, modals, invoice sheets" },
+        "low": { "value": "#F6F3F2", "type": "color", "description": "Inset table headers, filter pill strips, badges" },
+        "base": { "value": "#EFECEB", "type": "color", "description": "Subtle borders, nested divider bars" },
+        "high": { "value": "#E8E4E3", "type": "color", "description": "Hover backdrop for neutral chips" },
+        "highest": { "value": "#DED9D8", "type": "color", "description": "Selected state border / dark neutral stroke" }
+      }
+    },
+    "text": {
+      "primary": { "value": "#14121B", "type": "color", "description": "Primary headings, titles, high contrast WCAG AAA (>12:1)" },
+      "secondary": { "value": "#55595F", "type": "color", "description": "Body copy, subtitles, secondary metadata" },
+      "tertiary": { "value": "#8C9098", "type": "color", "description": "Timestamps, monospace telemetry indicators" }
+    },
+    "border": {
+      "subtle": { "value": "#E5E0DF", "type": "color", "description": "Standard 1px hairline border" },
+      "strong": { "value": "#C4C0C0", "type": "color", "description": "Input borders, active focus state rings" }
+    },
+    "brand": {
+      "primary": { "value": "#F26A36", "type": "color", "description": "FixMate Safety Orange for primary CTAs and escrow triggers" },
+      "primaryHover": { "value": "#E05824", "type": "color", "description": "Hover state for primary action buttons" },
+      "primaryActive": { "value": "#C94B1B", "type": "color", "description": "Pressed / active state for primary action buttons" },
+      "primaryContainer": { "value": "#FFF1EC", "type": "color", "description": "Subtle badge background, highlight pill fills" },
+      "onPrimary": { "value": "#FFFFFF", "type": "color", "description": "Text and icons on top of brand primary accent" }
+    },
+    "semantic": {
+      "success": { "value": "#10B981", "type": "color", "description": "Escrow released, diagnostic passed" },
+      "successContainer": { "value": "#ECFDF5", "type": "color", "description": "Success chip fill" },
+      "info": { "value": "#00C4D6", "type": "color", "description": "Live GPS telemetry, transit tracker" },
+      "infoContainer": { "value": "#E6FCFD", "type": "color", "description": "Info chip fill" },
+      "warning": { "value": "#F59E0B", "type": "color", "description": "Auto-disconnect countdown, alert notices" },
+      "warningContainer": { "value": "#FFFBEB", "type": "color", "description": "Warning chip fill" },
+      "error": { "value": "#EF4444", "type": "color", "description": "Route disconnection, 404 fault codes" },
+      "errorContainer": { "value": "#FEF2F2", "type": "color", "description": "Error chip fill" },
+      "purpleTech": { "value": "#8B5CF6", "type": "color", "description": "Cryptographic ledger hash, blockchain verification" },
+      "purpleTechContainer": { "value": "#F5F3FF", "type": "color", "description": "Purple telemetry chip fill" }
+    }
+  },
+  "typography": {
+    "fontFamily": {
+      "heading": { "value": "Sora, sans-serif", "type": "fontFamily" },
+      "sans": { "value": "Inter, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif", "type": "fontFamily" },
+      "mono": { "value": "JetBrains Mono, SF Mono, Menlo, monospace", "type": "fontFamily" }
+    },
+    "fontSize": {
+      "micro": { "value": "10px", "type": "dimension" },
+      "caption": { "value": "12px", "type": "dimension" },
+      "bodySm": { "value": "13px", "type": "dimension" },
+      "body": { "value": "14px", "type": "dimension" },
+      "bodyLg": { "value": "16px", "type": "dimension" },
+      "h3": { "value": "18px", "type": "dimension" },
+      "h2": { "value": "24px", "type": "dimension" },
+      "h1": { "value": "32px", "type": "dimension" },
+      "display": { "value": "48px", "type": "dimension" }
+    },
+    "fontWeight": {
+      "regular": { "value": "400", "type": "fontWeight" },
+      "medium": { "value": "500", "type": "fontWeight" },
+      "semibold": { "value": "600", "type": "fontWeight" },
+      "bold": { "value": "700", "type": "fontWeight" },
+      "extrabold": { "value": "800", "type": "fontWeight" }
+    }
+  },
+  "spacing": {
+    "1": { "value": "4px", "type": "dimension" },
+    "2": { "value": "8px", "type": "dimension" },
+    "3": { "value": "12px", "type": "dimension" },
+    "4": { "value": "16px", "type": "dimension" },
+    "5": { "value": "20px", "type": "dimension" },
+    "6": { "value": "24px", "type": "dimension" },
+    "8": { "value": "32px", "type": "dimension" },
+    "10": { "value": "40px", "type": "dimension" },
+    "12": { "value": "48px", "type": "dimension" },
+    "16": { "value": "64px", "type": "dimension" }
+  },
+  "borderRadius": {
+    "none": { "value": "0px", "type": "dimension" },
+    "sm": { "value": "4px", "type": "dimension" },
+    "md": { "value": "8px", "type": "dimension" },
+    "lg": { "value": "12px", "type": "dimension" },
+    "xl": { "value": "16px", "type": "dimension" },
+    "2xl": { "value": "20px", "type": "dimension" },
+    "3xl": { "value": "24px", "type": "dimension" },
+    "full": { "value": "9999px", "type": "dimension" }
+  },
+  "elevation": {
+    "low": { "value": "0 1px 2px 0 rgba(0, 0, 0, 0.04)", "type": "boxShadow" },
+    "card": { "value": "0 2px 8px -2px rgba(20, 18, 27, 0.05), 0 1px 3px -1px rgba(20, 18, 27, 0.03)", "type": "boxShadow" },
+    "modal": { "value": "0 20px 40px -15px rgba(20, 18, 27, 0.12), 0 0 0 1px rgba(20, 18, 27, 0.05)", "type": "boxShadow" },
+    "glowPrimary": { "value": "0 8px 24px -4px rgba(242, 106, 54, 0.25)", "type": "boxShadow" }
+  }
+}

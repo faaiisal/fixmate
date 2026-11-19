@@ -1,4 +1,11 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# FixMate
+### Smart Device & Home Appliance Repair Service Platform
+
+FixMate is an online repair service platform that connects customers with skilled technicians. Customers can explore repair services, request a repair, track their booking status, and pay securely after the repair is completed.
+
+## Live Website
+**Live URL:** `Add your deployed client URL here`
+
 
 ## Getting Started
 
@@ -14,23 +21,30 @@ pnpm dev
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Admin Login
+- **Email:** `Add admin email`
+- **Password:** `Add admin password`
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Key Features
+- Browse and explore repair services.
+- Search and filter available services.
+- Register and log in as a Customer or Technician.
+- Submit repair requests with problem details.
+- Track repair booking status.
+- Technicians can manage services and repair requests.
+- Admin can manage users and approve services.
+- Secure online payments with Stripe.
+- Responsive design for mobile, tablet, and desktop.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-## Learn More
+## Technologies & Packages
+- Next.js
+- React
+- TypeScript
+- Tailwind CSS
+- shadcn/ui
+- BetterAuth
+- Lucide React
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Project Purpose
+FixMate makes device and home appliance repair easier by bringing customers and technicians together in one platform. It provides a simple way to find repair services, manage repair requests, track progress, and complete payments securely.
