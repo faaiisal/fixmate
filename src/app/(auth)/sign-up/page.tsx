@@ -1,23 +1,41 @@
 "use client";
 
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signUpSchema } from "@/lib/validations/auth.schema";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { CardContainer } from "@/components/ui/card-container";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Checkbox } from "@/components/ui/checkbox";
 import Link from "next/link";
 import { useState } from "react";
+import { Wand2 } from "lucide-react";
 
 type FormValues = {
   name: string;
   email: string;
   phone?: string;
   password: string;
+  confirmPassword?: string;
   terms: boolean;
 };
+
+function generateStrongPassword() {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%";
+  let pwd = "";
+  // Ensure at least one letter and one number
+  pwd += "Aa1!";
+  for (let i = 0; i < 8; i++) {
+    pwd += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return pwd
+    .split("")
+    .sort(() => 0.5 - Math.random())
+    .join("")
+    .slice(0, 12);
+}
 
 export default function SignUpPage() {
   const [role, setRole] = useState<"customer" | "technician" | "corporate">("customer");
@@ -25,11 +43,29 @@ export default function SignUpPage() {
   const form = useForm<FormValues>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(signUpSchema as any) as any,
-    defaultValues: { name: "", email: "", phone: "", password: "", terms: false },
+    defaultValues: { name: "", email: "", phone: "", password: "", confirmPassword: "", terms: false },
   });
+
+  const passwordValue = useWatch({ control: form.control, name: "password" }) || "";
+
+  const getStrength = (pwd: string) => {
+    let score = 0;
+    if (pwd.length >= 8) score++;
+    if (/[A-Z]/.test(pwd)) score++;
+    if (/[0-9]/.test(pwd)) score++;
+    if (/[^A-Za-z0-9]/.test(pwd)) score++;
+    return score; // 0-4
+  };
+  const strength = getStrength(passwordValue as string);
 
   const onSubmit = (data: FormValues) => {
     console.log({ ...data, role });
+  };
+
+  const handleGenerate = () => {
+    const newPwd = generateStrongPassword();
+    form.setValue("password", newPwd, { shouldValidate: true });
+    form.setValue("confirmPassword", newPwd, { shouldValidate: true });
   };
 
   return (
@@ -87,19 +123,47 @@ export default function SignUpPage() {
                 <FormMessage />
               </FormItem>
             )} />
+
+            {/* Password with toggle + generate */}
             <FormField control={form.control} name="password" render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-[11px] font-mono">SECURITY KEY // PASSWORD</FormLabel>
-                <FormControl><Input type="password" placeholder="••••••••" {...field} /></FormControl>
-                <div className="mt-2 grid grid-cols-4 gap-1">
-                  <div className="h-1 rounded-full bg-[#F26A36]" />
-                  <div className="h-1 rounded-full bg-[#E5E0DF]" />
-                  <div className="h-1 rounded-full bg-[#E5E0DF]" />
-                  <div className="h-1 rounded-full bg-[#E5E0DF]" />
+                <div className="flex items-center justify-between">
+                  <FormLabel className="text-[11px] font-mono">SECURITY KEY // PASSWORD</FormLabel>
+                  <button type="button" onClick={handleGenerate} className="text-[10px] font-mono text-[#F26A36] hover:underline flex items-center gap-1">
+                    <Wand2 className="w-3 h-3" /> Generate
+                  </button>
                 </div>
+                <FormControl>
+                  <PasswordInput placeholder="At least 8 characters" {...field} />
+                </FormControl>
+                <div className="mt-2 grid grid-cols-4 gap-1">
+                  <div className={`h-1 rounded-full ${strength >= 1 ? "bg-[#F26A36]" : "bg-[#E5E0DF]"}`} />
+                  <div className={`h-1 rounded-full ${strength >= 2 ? "bg-[#F26A36]" : "bg-[#E5E0DF]"}`} />
+                  <div className={`h-1 rounded-full ${strength >= 3 ? "bg-[#F26A36]" : "bg-[#E5E0DF]"}`} />
+                  <div className={`h-1 rounded-full ${strength >= 4 ? "bg-[#10B981]" : "bg-[#E5E0DF]"}`} />
+                </div>
+                <p className="text-[10px] font-mono text-[#8C9098] mt-1">
+                  {strength === 0 && "Enter password"}
+                  {strength === 1 && "Weak • Add uppercase & number"}
+                  {strength === 2 && "Fair • Add symbol"}
+                  {strength === 3 && "Good • Add special char for strong"}
+                  {strength === 4 && "Strong • 12 chars with symbol"}
+                </p>
                 <FormMessage />
               </FormItem>
             )} />
+
+            {/* Confirm Password with toggle */}
+            <FormField control={form.control} name="confirmPassword" render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-[11px] font-mono">CONFIRM KEY // RE-ENTER PASSWORD</FormLabel>
+                <FormControl>
+                  <PasswordInput placeholder="Re-enter at least 8 characters" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )} />
+
             <FormField control={form.control} name="terms" render={({ field }) => (
               <FormItem>
                 <div className="flex items-start gap-2">

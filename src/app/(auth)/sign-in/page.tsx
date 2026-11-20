@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { signInSchema, SignInInput } from "@/lib/validations/auth.schema";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { CardContainer } from "@/components/ui/card-container";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -47,7 +48,9 @@ export default function SignInPage() {
             <FormField control={form.control} name="password" render={({ field }) => (
               <FormItem>
                 <FormLabel className="text-[11px] font-mono">ACCESS_KEY // PASSWORD</FormLabel>
-                <FormControl><Input type="password" placeholder="••••••••" {...field} /></FormControl>
+                <FormControl>
+                  <PasswordInput placeholder="At least 8 characters" {...field} />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )} />
