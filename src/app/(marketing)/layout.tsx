@@ -1,12 +1,12 @@
-import { PublicNavbar } from "@/components/shared/public-navbar";
-import { PublicFooter } from "@/components/shared/public-footer";
+import { Navbar } from "@/components/shared/navbar";
+import { Footer } from "@/components/shared/footer";
 
 export default function MarketingLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col bg-[#FCF9F8]">
-      <PublicNavbar />
+      <Navbar />
       <main className="flex-1">{children}</main>
-      <PublicFooter />
+      <Footer />
     </div>
   );
 }

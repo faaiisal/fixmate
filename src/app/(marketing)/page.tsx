@@ -2,7 +2,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { CardContainer } from "@/components/ui/card-container";
-import { TelemetryBadge } from "@/components/ui/telemetry-badge";
 import { Badge } from "@/components/ui/badge";
 
 // WebP images from src/app/images/ - all .webp per requirement
