@@ -81,7 +81,7 @@ export function PublicNavbarMobile({
             </Button>
             <Button asChild className="rounded-full bg-[#F26A36] hover:bg-[#E05824] text-white w-full">
               <Link href={bookRepairHref} onClick={() => setOpen(false)}>
-                Book Repair
+                Get Started
               </Link>
             </Button>
           </div>

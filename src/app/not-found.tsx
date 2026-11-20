@@ -107,7 +107,7 @@ export default function NotFound() {
               <div className="space-y-3">
                 {[
                   { icon: "🧠", title: "Memory Scan", desc: "Clear cache & retry", route: "/services" },
-                  { icon: "🔧", title: "Appliance Dispatch", desc: "Book repair", route: "/services" },
+                  { icon: "🔧", title: "Appliance Dispatch", desc: "Get Started", route: "/services" },
                   { icon: "🛡️", title: "Warranty Check", desc: "Verify coverage", route: "/about" },
                 ].map((item) => (
                   <Link key={item.title} href={item.route} className="flex items-center gap-3 p-3 rounded-xl border border-[#E5E0DF] hover:border-[#F26A36]/50 hover:bg-[#FFF1EC] transition-colors group">

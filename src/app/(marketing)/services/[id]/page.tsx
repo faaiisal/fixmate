@@ -86,7 +86,7 @@ export default function ServiceDetailsPage({ params }: { params: { id: string } 
         <div className="lg:col-span-5">
           <div className="sticky top-24 space-y-4">
             <CardContainer className="p-6">
-              <h3 className="font-semibold mb-4">Book Repair</h3>
+              <h3 className="font-semibold mb-4">Get Started</h3>
               <div className="space-y-4">
                 <div>
                   <label className="text-xs font-mono text-[#8C9098]">PHONE • DISPATCH SMS SECURED</label>
