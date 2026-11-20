@@ -155,7 +155,7 @@ const testimonials = [
   },
   {
     rating: 5,
-    quote: "Apple Store quoted me $1,100 to replace the entire logic board for a coffee spill. Elena microsoldered the backlight power trace on my MacBook M2 for a fraction of that. Simply masterful work.",
+    quote: "GitHub Store quoted me $1,100 to replace the entire logic board for a coffee spill. Elena microsoldered the backlight power trace on my MacBook M2 for a fraction of that. Simply masterful work.",
     workOrder: "#FX-9104",
     issue: "Backlight Circuit Corroded Trace",
     time: "58 minutes",

@@ -15,7 +15,7 @@ const NAV_ITEMS = [
 
 const AUTH_ACTIONS = {
   signInHref: "/sign-in",
-  bookRepairHref: "/sign-up", // Book Repair → signup per fix
+  bookRepairHref: "/sign-up", // Get Started → signup per fix
 } as const;
 
 // --- Logo: 120px as requested, real public/fixmate-logo.png ---
@@ -41,7 +41,7 @@ function Actions() {
         <Link href={AUTH_ACTIONS.signInHref}>Sign In</Link>
       </Button>
       <Button asChild size="sm" className="rounded-full bg-[#F26A36] hover:bg-[#E05824] text-white px-5 h-9 shadow-sm">
-        <Link href={AUTH_ACTIONS.bookRepairHref}>Book Repair</Link>
+        <Link href={AUTH_ACTIONS.bookRepairHref}>Get Started</Link>
       </Button>
       <Avatar className="w-8 h-8 border border-[#FFD6C2] bg-[#FFF1EC]">
         <AvatarFallback className="bg-[#FFF1EC] text-[#F26A36] text-xs">A</AvatarFallback>

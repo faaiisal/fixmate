@@ -68,7 +68,7 @@ export default function SignInPage() {
         </div>
 
         <div className="grid grid-cols-3 gap-2">
-          {["Google", "Apple", "Passkey"].map((p) => (
+          {["Google", "Github", "Passkey"].map((p) => (
             <Button key={p} variant="outline" size="sm" className="rounded-full">{p}</Button>
           ))}
         </div>

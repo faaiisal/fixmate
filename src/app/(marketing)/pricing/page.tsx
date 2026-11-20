@@ -115,7 +115,7 @@ export default function PricingPage() {
           </p>
           <div className="mt-6 flex justify-center gap-3">
             <Button asChild className="rounded-full bg-[#F26A36] hover:bg-[#E05824]">
-              <Link href="/sign-up">Book Repair Now</Link>
+              <Link href="/sign-up">Get Started</Link>
             </Button>
             <Button asChild variant="outline" className="rounded-full bg-white">
               <Link href="/about">Learn More</Link>

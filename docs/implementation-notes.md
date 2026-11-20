@@ -23,7 +23,7 @@ fixmate-platform/
 │   │   ├── logo-wordmark.svg      # FixMate horizontal brand mark
 │   │   └── favicon.ico
 │   ├── icons/
-│   │   └── apple-touch-icon.png
+│   │   └── githube-touch-icon.png
 │   └── images/
 │       ├── van-sprinter.webp      # Fleet tracking illustration asset
 │       └── micro-grid-pattern.svg # Hairline radial dot matrix
