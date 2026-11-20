@@ -5,11 +5,11 @@ import { getDbSync } from "./db";
 /**
  * FixMate BetterAuth Configuration
  * Clean Architecture: Server-only, never import in client components directly
- * 
+ *
  * Location: src/lib/auth.ts (NOT in validations/)
  * - validations/ is for Zod schemas only (auth.schema.ts, booking.schema.ts, service.schema.ts)
  * - lib/auth.ts is for BetterAuth server config
- * 
+ *
  * Supports:
  * - Email & Password (with auto sign-in disabled if you require verification)
  * - Google OAuth
@@ -22,7 +22,10 @@ export const auth = betterAuth({
   appName: "FixMate",
 
   // Base URL: fallback to BETTER_AUTH_URL env
-  baseURL: process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+  baseURL:
+    process.env.BETTER_AUTH_URL ||
+    process.env.NEXT_PUBLIC_APP_URL ||
+    "http://localhost:3000",
 
   // Secret: required in production
   secret: process.env.BETTER_AUTH_SECRET,
@@ -41,6 +44,14 @@ export const auth = betterAuth({
   // Email & Password
   emailAndPassword: {
     enabled: true,
+    user: {
+      additionalFields: {
+        role: {
+          type: ['customer', 'admin', 'technician'],
+          input: false,
+        },
+      },
+    },
     requireEmailVerification: false, // Set true if you want to enforce verification
     minPasswordLength: 8,
     autoSignIn: true, // Auto sign in after sign-up
