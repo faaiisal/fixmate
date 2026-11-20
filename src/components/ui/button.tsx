@@ -48,13 +48,19 @@ type ButtonProps = ButtonPrimitive.Props &
   };
 
 function Button({ className, variant = "default", size = "default", asChild, children, ...props }: ButtonProps) {
-  if (asChild && children) {
-    const child = children as React.ReactElement<{ className?: string }>;
-    const childClassName = (child.props as { className?: string }).className;
-    return React.cloneElement(child as React.ReactElement, {
-      className: cn(buttonVariants({ variant, size, className }), childClassName),
-      ...(props as object),
-    } as React.Attributes & { className: string });
+  if (asChild) {
+    const child = children as React.ReactElement | undefined;
+    // Safe guard: if child is valid element, clone with merged className
+    if (child && React.isValidElement(child)) {
+      const childProps = (child.props as { className?: string }) || {};
+      const childClassName = childProps.className;
+      return React.cloneElement(child as React.ReactElement, {
+        className: cn(buttonVariants({ variant, size, className }), childClassName),
+        ...(props as object),
+      } as React.Attributes & { className: string });
+    }
+    // Fallback: if not valid element, render normal button to avoid crash "className of undefined"
+    console.warn("Button asChild expected single React element child, got:", children);
   }
 
   return (
