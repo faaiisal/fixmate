@@ -21,11 +21,10 @@ const { db, client } = getDbSync();
 export const auth = betterAuth({
   appName: "FixMate",
 
-  // Base URL: BetterAuth will fallback to BETTER_AUTH_URL env if not set
-  // Recommended to set BETTER_AUTH_URL in .env.local
+  // Base URL: fallback to BETTER_AUTH_URL env
+  baseURL: process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
 
-
-  // Secret: required in production, falls back to BETTER_AUTH_SECRET or AUTH_SECRET env
+  // Secret: required in production
   secret: process.env.BETTER_AUTH_SECRET,
 
   // Trusted origins: baseURL is trusted by default, add frontend URL

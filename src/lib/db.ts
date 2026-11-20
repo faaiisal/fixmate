@@ -70,7 +70,7 @@ export function getDbSync(): { db: Db; client: MongoClient } {
     // During build, return dummy to avoid throwing - auth route will fail at runtime if no env, which is expected
     // Create a client with dummy uri that won't connect until used
     // For build, we need to not throw, so we create a client with localhost fallback
-    const fallbackUri = "mongodb://localhost:27017/fixmatedb";
+    const fallbackUri = (process.env.BETTER_AUTH_DB_URL as string)
     const client = new MongoClient(fallbackUri);
     const db = client.db("fixmatedb");
     return { db, client };

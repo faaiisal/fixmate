@@ -4,22 +4,58 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signInSchema, SignInInput } from "@/lib/validations/auth.schema";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { CardContainer } from "@/components/ui/card-container";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import Link from "next/link";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
+import { authClient } from "@/lib/auth-client";
+import { toast } from "sonner";
 
 export default function SignInPage() {
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+
   const form = useForm<SignInInput>({
     resolver: zodResolver(signInSchema),
     defaultValues: { email: "", password: "", remember: false },
   });
 
-  const onSubmit = (data: SignInInput) => {
-    console.log(data);
-    // TODO: implement BetterAuth sign-in
+  const onSubmit = async (data: SignInInput) => {
+    setIsLoading(true);
+    try {
+      const res = await authClient.signIn.email({
+        email: data.email,
+        password: data.password,
+        rememberMe: data.remember,
+        callbackURL: "/",
+      });
+
+      if (res.error) {
+        toast.error(res.error.message || "Sign in failed");
+        return;
+      }
+
+      toast.success("Authenticated! Redirecting...");
+      router.push("/dashboard/customer");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Something went wrong";
+      toast.error(message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSocial = async (provider: "google" | "github") => {
+    try {
+      await authClient.signIn.social({ provider, callbackURL: "/" });
+    } catch {
+      toast.error(`Failed to sign in with ${provider}`);
+    }
   };
 
   return (
@@ -34,8 +70,6 @@ export default function SignInPage() {
           </div>
         </div>
 
-        <div className="mb-6 p-3 rounded-lg bg-[#FFFBEB] border border-[#FDE68A] text-xs hidden">Invalid node key - attempt 1 of 5</div>
-
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField control={form.control} name="email" render={({ field }) => (
@@ -48,20 +82,24 @@ export default function SignInPage() {
             <FormField control={form.control} name="password" render={({ field }) => (
               <FormItem>
                 <FormLabel className="text-[11px] font-mono">ACCESS_KEY // PASSWORD</FormLabel>
-                <FormControl>
-                  <PasswordInput placeholder="At least 8 characters" {...field} />
-                </FormControl>
+                <FormControl><PasswordInput placeholder="At least 8 characters" {...field} /></FormControl>
                 <FormMessage />
               </FormItem>
             )} />
+
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Checkbox id="remember" />
-                <label htmlFor="remember" className="text-xs">Remember node</label>
-              </div>
+              <FormField control={form.control} name="remember" render={({ field }) => (
+                <FormItem className="flex items-center gap-2 space-y-0">
+                  <FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} id="remember" /></FormControl>
+                  <FormLabel htmlFor="remember" className="text-xs font-normal">Remember node</FormLabel>
+                </FormItem>
+              )} />
               <Link href="#" className="text-xs text-[#F26A36]">Forgot key?</Link>
             </div>
-            <Button type="submit" className="w-full bg-[#F26A36] hover:bg-[#E05824] h-11">Authenticate →</Button>
+
+            <Button type="submit" disabled={isLoading} className="w-full bg-[#F26A36] hover:bg-[#E05824] h-11">
+              {isLoading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Authenticating...</> : "Authenticate →"}
+            </Button>
           </form>
         </Form>
 
@@ -71,9 +109,9 @@ export default function SignInPage() {
         </div>
 
         <div className="grid grid-cols-3 gap-2">
-          {["Google", "Github", "Passkey"].map((p) => (
-            <Button key={p} variant="outline" size="sm" className="rounded-full">{p}</Button>
-          ))}
+          <Button variant="outline" size="sm" className="rounded-full" onClick={() => handleSocial("google")} disabled={isLoading}>Google</Button>
+          <Button variant="outline" size="sm" className="rounded-full" onClick={() => handleSocial("github")} disabled={isLoading}>Github</Button>
+          <Button variant="outline" size="sm" className="rounded-full" disabled>Passkey</Button>
         </div>
 
         <p className="mt-6 text-center text-xs text-[#8C9098]">

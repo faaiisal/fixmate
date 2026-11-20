@@ -1,6 +1,9 @@
-import { createAuthClient } from "better-auth/react"
+import { createAuthClient } from "better-auth/react";
+
+// Single client instance - uses same domain by default, or BETTER_AUTH_URL env
 export const authClient = createAuthClient({
-    /** The base URL of the server (optional if you're using the same domain) */
-     baseURL: process.env.BETTER_AUTH_URL,
-})
-export const { signIn, signUp, useSession } = createAuthClient()
+  baseURL: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+});
+
+// Export typed helpers from same instance
+export const { signIn, signUp, signOut, useSession } = authClient;
