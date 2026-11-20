@@ -156,9 +156,6 @@ export default function NotFound() {
 }
 
 function ClientTimestamp() {
-  const [ts, setTs] = React.useState<string>("loading...");
-  React.useEffect(() => {
-    setTs(new Date().toISOString());
-  }, []);
+  const [ts] = React.useState<string>(() => new Date().toISOString());
   return <div className="text-[#8C9098]">Timestamp: {ts}</div>;
 }

@@ -8,8 +8,8 @@
   /* FixMate Luminous Minimalist - Single Source of Truth */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-inter);
-  --font-heading: var(--font-sora);
+  --font-sans: var(--font-sans);
+  --font-heading: var(--font-sans);
   --font-mono: var(--font-jetbrains-mono);
   --color-brand: var(--brand-primary);
   --color-brand-hover: var(--brand-primary-hover);
@@ -71,11 +71,11 @@
   --radius-xl: var(--radius-xl);
   --radius-2xl: var(--radius-3xl);
   --radius-3xl: var(--radius-3xl);
+  --radius-4xl: calc(var(--radius) * 2.6);
 }
 
 :root {
   /* Surfaces - Luminous Minimalist */
-  --background: #fcf9f8;
   --surface: #fcf9f8;
   --surface-dim: #dcd9d9;
   --surface-bright: #fcf9f8;
@@ -86,7 +86,6 @@
   --surface-container-highest: #ded9d8;
 
   /* Text */
-  --foreground: #14121b;
   --text-primary: #14121b;
   --text-secondary: #55595f;
   --text-tertiary: #8c9098;
@@ -94,8 +93,8 @@
   /* Borders */
   --border-subtle: #e5e0df;
   --border-strong: #c4c0c0;
-  --border: #e5e0df;
-  --input: #c4c0c0;
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
 
   /* Brand - Safety Orange */
   --brand-primary: #f26a36;
@@ -103,8 +102,8 @@
   --brand-primary-active: #c94b1b;
   --brand-primary-container: #fff1ec;
   --on-primary: #ffffff;
-  --primary: #f26a36;
-  --primary-foreground: #ffffff;
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
 
   /* Semantic */
   --semantic-success: #10b981;
@@ -118,27 +117,27 @@
   --semantic-purple-tech: #8b5cf6;
   --semantic-purple-tech-container: #f5f3ff;
 
-  --destructive: #ef4444;
+  --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: #ffffff;
-  --card: #ffffff;
-  --card-foreground: #14121b;
-  --popover: #ffffff;
-  --popover-foreground: #14121b;
-  --secondary: #f6f3f2;
-  --secondary-foreground: #14121b;
-  --muted: #f6f3f2;
-  --muted-foreground: #55595f;
-  --accent: #e8e4e3;
-  --accent-foreground: #14121b;
-  --ring: #f26a36;
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --ring: oklch(0.708 0 0);
 
-  --chart-1: #f26a36;
-  --chart-2: #00c4d6;
-  --chart-3: #10b981;
-  --chart-4: #f59e0b;
-  --chart-5: #8b5cf6;
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
 
-  --radius: 0.75rem;
+  --radius: 0.625rem;
   --radius-sm: 0.25rem;
   --radius-md: 0.5rem;
   --radius-lg: 0.75rem;
@@ -147,50 +146,57 @@
   --radius-3xl: 1.5rem;
   --radius-full: 9999px;
 
-  --sidebar: #ffffff;
-  --sidebar-foreground: #14121b;
-  --sidebar-primary: #f26a36;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #f6f3f2;
-  --sidebar-accent-foreground: #14121b;
-  --sidebar-border: #e5e0df;
-  --sidebar-ring: #f26a36;
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
 
   /* Elevation */
   --elevation-low: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
   --elevation-card: 0 2px 8px -2px rgba(20, 18, 27, 0.05), 0 1px 3px -1px rgba(20, 18, 27, 0.03);
   --elevation-modal: 0 20px 40px -15px rgba(20, 18, 27, 0.12), 0 0 0 1px rgba(20, 18, 27, 0.05);
   --elevation-glow-primary: 0 8px 24px -4px rgba(242, 106, 54, 0.25);
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
 }
 
 /* Light-only theme - no dark variant per spec, but keep .dark for shadcn compatibility using same light tokens */
 .dark {
-  --background: #fcf9f8;
-  --foreground: #14121b;
-  --card: #ffffff;
-  --card-foreground: #14121b;
-  --popover: #ffffff;
-  --popover-foreground: #14121b;
-  --primary: #f26a36;
-  --primary-foreground: #ffffff;
-  --secondary: #f6f3f2;
-  --secondary-foreground: #14121b;
-  --muted: #f6f3f2;
-  --muted-foreground: #55595f;
-  --accent: #e8e4e3;
-  --accent-foreground: #14121b;
-  --destructive: #ef4444;
-  --border: #e5e0df;
-  --input: #c4c0c0;
-  --ring: #f26a36;
-  --sidebar: #ffffff;
-  --sidebar-foreground: #14121b;
-  --sidebar-primary: #f26a36;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #f6f3f2;
-  --sidebar-accent-foreground: #14121b;
-  --sidebar-border: #e5e0df;
-  --sidebar-ring: #f26a36;
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
 }
 
 @layer base {
@@ -198,7 +204,7 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    @apply font-sans antialiased bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
   html {

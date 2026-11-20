@@ -43,7 +43,7 @@ export default function SignUpPage() {
 
         <div className="grid grid-cols-2 gap-2 mb-6">
           <Button variant="outline" size="sm">Continue with Google</Button>
-          <Button variant="outline" size="sm">Continue with Apple</Button>
+          <Button variant="outline" size="sm">Continue with Github</Button>
         </div>
 
         <div className="my-4 relative">
