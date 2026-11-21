@@ -13,7 +13,6 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
 export default function ServiceDetailsPage({ params }: { params: { id: string } | Promise<{ id: string }> }) {
-  // Next 16 params may be Promise — unwrap with React.use if needed
   const resolvedParams = params instanceof Promise ? use(params as Promise<{ id: string }>) : params;
   const id = resolvedParams.id;
 
@@ -24,6 +23,7 @@ export default function ServiceDetailsPage({ params }: { params: { id: string } 
 
   const [service, setService] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [bookingLoading, setBookingLoading] = useState(false);
 
   const [phone, setPhone] = useState("");
@@ -32,22 +32,56 @@ export default function ServiceDetailsPage({ params }: { params: { id: string } 
   const [timeSlot, setTimeSlot] = useState("morning");
   const [fault, setFault] = useState("");
 
-  useEffect(() => {
-    async function fetchService() {
-      try {
-        setLoading(true);
-        const res = await servicesApi.details(id, token || undefined);
-        setService(res.data);
-      } catch (err: any) {
-        console.error("Failed to fetch service details:", err);
-        // Keep null to show not found, but preserve UI with fallback
-        toast.error(err.message || "Failed to load service");
-      } finally {
-        setLoading(false);
+  const fetchService = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await servicesApi.details(id, token || undefined);
+      setService(res.data);
+    } catch (err: any) {
+      console.error("Failed to fetch service details:", err);
+      const msg = err.message || "Failed to load service";
+      setError(msg);
+      // Show fallback mock for UI preservation when backend down or extension blocks fetch
+      setService({
+        _id: id,
+        title: "Samsung Bespoke 4-Door French Door Refrigerator Repair (Fallback - Backend Unreachable)",
+        description:
+          "Backend not reachable at " +
+          (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api") +
+          ". Please ensure backend server is running (cd fixmate-server && npm run dev on port 5000). " +
+          "If you see chrome-extension://hoklmmgfnpapgjgcpechhaamimifchmp/frame_ant error, disable ad-blocker / frame_ant extension that blocks fetch to localhost:5000. Original error: " +
+          msg,
+        basePrice: 280,
+        category: "Refrigerator",
+        approvalStatus: "approved",
+        isAvailable: true,
+        serviceMode: "doorstep",
+        serviceArea: "San Francisco, Bay Area",
+        image: "",
+        estimatedDuration: "2-3 hours",
+        technicianId: "fallback",
+      });
+      // Only toast if it's not a network error already explained in UI
+      if (!msg.includes("Backend not reachable")) {
+        toast.error(msg);
       }
+    } finally {
+      setLoading(false);
     }
+  };
+
+  useEffect(() => {
     fetchService();
-  }, [id, token]);
+  }, [id]); // Don't depend on token for public fetch to avoid extra requests when session loads
+
+  // Refetch with token when token becomes available to get owner/admin view of pending services
+  useEffect(() => {
+    if (token && service && service.approvalStatus === "pending") {
+      // If service was fetched without auth and is pending, try refetch with token to see if owner/admin can view
+      fetchService();
+    }
+  }, [token]);
 
   const handleBooking = async () => {
     if (!token) {
@@ -70,23 +104,18 @@ export default function ServiceDetailsPage({ params }: { params: { id: string } 
 
     setBookingLoading(true);
     try {
-      // Map date selection to actual date
       const preferredDate = new Date();
       if (date === "tomorrow") preferredDate.setDate(preferredDate.getDate() + 1);
-      else if (date === "today") {
-        // today
-      } else {
-        // Try parse as date string
+      else {
         const parsed = new Date(date);
         if (!isNaN(parsed.getTime())) {
           preferredDate.setTime(parsed.getTime());
         }
       }
 
-      // For simplicity, include time slot in description or ignore
       const description = `${fault} [Time pref: ${timeSlot}]`;
 
-      const res = await bookingsApi.create(token, {
+      await bookingsApi.create(token, {
         serviceId: id,
         phone,
         address,
@@ -95,7 +124,6 @@ export default function ServiceDetailsPage({ params }: { params: { id: string } 
       });
 
       toast.success("Repair request created! Status: requested");
-      // Redirect to my bookings
       router.push("/dashboard/customer/bookings");
     } catch (err: any) {
       toast.error(err.message || "Failed to create booking");
@@ -107,13 +135,12 @@ export default function ServiceDetailsPage({ params }: { params: { id: string } 
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-12 text-center text-sm text-[#8C9098]">
-        Loading service details from backend...
+        Loading service details from backend {process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}...
       </div>
     );
   }
 
   const displayTitle = service?.title || "Service Not Found";
-  const displayDesc = service?.description || "This service is not available or not approved.";
   const displayPrice = service?.basePrice ? `$${service.basePrice}` : "$280";
   const displayCategory = service?.category || "REFRIGERATOR SERVICES";
 
@@ -122,6 +149,22 @@ export default function ServiceDetailsPage({ params }: { params: { id: string } 
       <div className="flex items-center gap-2 text-xs font-mono text-[#8C9098] mb-6">
         <span>HOME</span>/<span>SERVICES</span>/<span className="text-[#14121B]">{id.toUpperCase()}</span>
       </div>
+
+      {error && (
+        <CardContainer className="p-4 mb-6 bg-[#FFFBEB] border-[#FDE68A]">
+          <h4 className="font-semibold text-sm text-[#92400E]">Backend Connection Issue — Showing Fallback Data</h4>
+          <p className="text-xs text-[#92400E] mt-1 whitespace-pre-wrap">{error}</p>
+          <p className="text-xs text-[#92400E] mt-2">
+            <strong>Fix:</strong> 1) Ensure backend is running: <code>cd fixmate-server && npm run build && node dist/server.js</code> or <code>npm run dev</code> on port 5000. 2) Check
+            <code> NEXT_PUBLIC_API_URL={process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}</code> in <code>fixmate/.env</code>. 3) Disable Chrome extensions that block fetch to localhost (the error stack shows{" "}
+            <code>chrome-extension://hoklmmgfnpapgjgcpechhaamimifchmp/frame_ant</code> which is an ad-blocker/anti-fingerprint extension intercepting fetch). Try incognito without extensions. 4) Check backend CORS allows
+            <code> {process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}</code>.
+          </p>
+          <Button variant="outline" size="sm" className="mt-3" onClick={fetchService}>
+            Retry Fetch
+          </Button>
+        </CardContainer>
+      )}
 
       <div className="grid lg:grid-cols-12 gap-8">
         <div className="lg:col-span-7 space-y-6">
