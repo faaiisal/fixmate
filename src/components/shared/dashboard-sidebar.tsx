@@ -16,50 +16,50 @@ import {
   Users,
   Shield,
 } from "lucide-react";
-import { authClient } from "@/lib/auth-client";
+import { authClient, useSession } from "@/lib/auth-client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 type Role = "customer" | "technician" | "admin";
 
-// Latest version nav from admin_dashboard.html — 7 items + role extras
-// Icons mapped to Lucide per clean architecture
-const NAV_CONFIG: Record<
-  Role,
-  { label: string; href: string; icon: React.ElementType; workspace?: boolean }[]
-> = {
+const NAV_CONFIG: Record<Role, { label: string; href: string; icon: React.ElementType }[]> = {
   customer: [
-    { label: "Overview", href: "/dashboard/customer", icon: LayoutDashboard, workspace: true },
-    { label: "Bookings & Tracking", href: "/dashboard/customer/bookings", icon: ClipboardList, workspace: true },
-    { label: "Services Catalog", href: "/services", icon: Package, workspace: true },
-    { label: "Financial Escrow", href: "/dashboard/customer/payments", icon: CreditCard, workspace: true },
-    { label: "Settings", href: "/dashboard/profile", icon: Settings, workspace: true },
+    { label: "Overview", href: "/dashboard/customer", icon: LayoutDashboard },
+    { label: "Bookings & Tracking", href: "/dashboard/customer/bookings", icon: ClipboardList },
+    { label: "Services Catalog", href: "/services", icon: Package },
+    { label: "Financial Escrow", href: "/dashboard/customer/payments", icon: CreditCard },
+    { label: "Settings", href: "/dashboard/profile", icon: Settings },
   ],
   technician: [
-    { label: "Overview", href: "/dashboard/technician", icon: LayoutDashboard, workspace: true },
-    { label: "Diagnostic Dispatch", href: "/dashboard/technician/requests", icon: Stethoscope, workspace: true },
-    { label: "Services Catalog", href: "/dashboard/technician/my-services", icon: Package, workspace: true },
-    { label: "Financial Escrow", href: "/dashboard/technician", icon: CreditCard, workspace: true },
-    { label: "Analytics & Telemetry", href: "/dashboard/technician", icon: BarChart3, workspace: true },
-    { label: "Settings", href: "/dashboard/profile", icon: Settings, workspace: true },
+    { label: "Overview", href: "/dashboard/technician", icon: LayoutDashboard },
+    { label: "Diagnostic Dispatch", href: "/dashboard/technician/requests", icon: Stethoscope },
+    { label: "Services Catalog", href: "/dashboard/technician/my-services", icon: Package },
+    { label: "Financial Escrow", href: "/dashboard/technician", icon: CreditCard },
+    { label: "Analytics & Telemetry", href: "/dashboard/technician", icon: BarChart3 },
+    { label: "Settings", href: "/dashboard/profile", icon: Settings },
   ],
   admin: [
-    { label: "Overview", href: "/dashboard/admin", icon: LayoutDashboard, workspace: true },
-    { label: "Bookings & Tracking", href: "/dashboard/admin/bookings", icon: ClipboardList, workspace: true },
-    { label: "Diagnostic Dispatch", href: "/dashboard/admin/bookings", icon: Stethoscope, workspace: true },
-    { label: "Services Catalog", href: "/dashboard/admin/services", icon: Package, workspace: true },
-    { label: "Financial Escrow", href: "/dashboard/admin/transactions", icon: CreditCard, workspace: true },
-    { label: "Analytics & Telemetry", href: "/dashboard/admin", icon: BarChart3, workspace: true },
-    { label: "Users", href: "/dashboard/admin/users", icon: Users, workspace: true },
-    { label: "Settings", href: "/dashboard/profile", icon: Settings, workspace: true },
+    { label: "Overview", href: "/dashboard/admin", icon: LayoutDashboard },
+    { label: "Bookings & Tracking", href: "/dashboard/admin/bookings", icon: ClipboardList },
+    { label: "Diagnostic Dispatch", href: "/dashboard/admin/bookings", icon: Stethoscope },
+    { label: "Services Catalog", href: "/dashboard/admin/services", icon: Package },
+    { label: "Financial Escrow", href: "/dashboard/admin/transactions", icon: CreditCard },
+    { label: "Analytics & Telemetry", href: "/dashboard/admin", icon: BarChart3 },
+    { label: "Users", href: "/dashboard/admin/users", icon: Users },
+    { label: "Settings", href: "/dashboard/profile", icon: Settings },
   ],
 };
 
-export function DashboardSidebar({ role = "customer" as Role }) {
+export function DashboardSidebar({ role: propRole = "customer" as Role }) {
   const pathname = usePathname();
   const router = useRouter();
-  const items = NAV_CONFIG[role] || NAV_CONFIG.customer;
+  const { data: session } = useSession();
+  const sessionUser = session?.user as { name?: string; email?: string; role?: Role } | undefined;
+  const realRole = (sessionUser?.role as Role) || propRole;
+  const items = NAV_CONFIG[realRole] || NAV_CONFIG.customer;
+  const userName = sessionUser?.name || "Alex Miller";
+  const userEmail = sessionUser?.email || `${realRole}@fixmate.io`;
 
   const handleSignOut = async () => {
     try {
@@ -79,17 +79,15 @@ export function DashboardSidebar({ role = "customer" as Role }) {
 
   return (
     <div className="w-full md:w-64 bg-white border-r border-[#E5E0DF] flex flex-col h-full">
-      {/* Header: real logo 120px + role badge — per latest version, no FixVault footer logo */}
       <div className="h-[72px] px-4 flex items-center gap-3 border-b border-[#E5E0DF] shrink-0">
         <Link href="/" className="flex items-center gap-2" aria-label="FixMate Dashboard Home">
           <Image src="/fixmate-logo.png" alt="FixMate" width={120} height={64} className="w-[120px] h-auto object-contain" priority />
         </Link>
         <span className="ml-auto text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#F6F3F2] border border-[#E5E0DF] text-[#6c6764] uppercase tracking-wider">
-          {role}
+          {realRole}
         </span>
       </div>
 
-      {/* Workspace label + nav - matches admin_dashboard.html latest version */}
       <div className="flex-1 overflow-y-auto p-4 space-y-6">
         <div>
           <span className="px-3 text-[11px] font-mono font-semibold text-[#8C9098] uppercase tracking-wider">Workspace</span>
@@ -116,24 +114,19 @@ export function DashboardSidebar({ role = "customer" as Role }) {
         </div>
       </div>
 
-      {/* Footer: User card + Sign Out — replaces old FixVault logo box */}
       <div className="p-3 border-t border-[#E5E0DF] bg-[#FCF9F8] space-y-3 shrink-0">
-        {/* User */}
         <div className="flex items-center gap-3 p-2 rounded-xl bg-white border border-[#E5E0DF]">
           <Avatar className="w-9 h-9 border border-[#E7E7E9]">
             <AvatarFallback className="bg-[#FFF1EC] text-[#F26A36] font-bold text-xs">
-              {role === "admin" ? "A" : role === "technician" ? "T" : "C"}
+              {userName.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            <div className="text-sm font-semibold truncate">Alex Miller</div>
-            <div className="text-[11px] font-mono text-[#8C9098] truncate">
-              {role}@fixmate.io • {role.toUpperCase()}
-            </div>
+            <div className="text-sm font-semibold truncate">{userName}</div>
+            <div className="text-[11px] font-mono text-[#8C9098] truncate">{userEmail}</div>
           </div>
         </div>
 
-        {/* Sign Out + FixVault mini */}
         <div className="flex items-center gap-2">
           <Button
             variant="outline"

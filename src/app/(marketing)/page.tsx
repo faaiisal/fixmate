@@ -229,8 +229,11 @@ export default function HomePage() {
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
                   <div className="sm:col-span-5 relative">
-                    <select className="w-full h-12 pl-10 pr-8 rounded-lg bg-[#F7F7F8] border border-[#E7E7E9] text-[#171717] text-sm focus:outline-none focus:ring-2 focus:ring-[#F26A36]">
-                      <option disabled selected value="">
+                    <select
+                      defaultValue=""
+                      className="w-full h-12 pl-10 pr-8 rounded-lg bg-[#F7F7F8] border border-[#E7E7E9] text-[#171717] text-sm focus:outline-none focus:ring-2 focus:ring-[#F26A36]"
+                    >
+                      <option disabled value="">
                         Select Appliance or Device
                       </option>
                       <option>Smart Refrigerator & Freezer</option>
