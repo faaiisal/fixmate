@@ -1,70 +1,80 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# dependencies & logs
-/node_modules
-/.pnp
+# Dependencies & Package Managers
+node_modules/
+.pnp/
 .pnp.*
 .yarn/*
 !.yarn/patches
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
-npm-debug.log*
-yarn-debug.log*
-pnpm-debug.log*
 
-# testing
+# Testing & Coverage
 /coverage
 coverage/
 .nyc_output/
 
-# next.js
+# Next.js Build Output - Never push compiled app
 /.next/
 /out/
-
-# production
 /build
+/dist
+/.dist
+.turbo/
 
-# misc
+# Production Misc
 .DS_Store
 *.pem
 Thumbs.db
-.dist
+.DS_Store?
+ehthumbs.db
 
-# debug
+# Debug Logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.pnpm-debug.log*
+pnpm-debug.log*
+lerna-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env 
-.env*
-!.env.example
+# Environment Variables - MUST NOT push secrets to GitHub
+.env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
+.env.*.local
+# Allow example file with placeholders only
+!.env.example
 
-# vercel
+# Vercel
 .vercel/
 
-# typescript
+# TypeScript
 *.tsbuildinfo
 next-env.d.ts
+tsconfig.tsbuildinfo
+
+# OS Files
+.DS_Store
+Thumbs.db
 
 # Local-only design resources — DO NOT PUSH
 fixmate-local/
-
-# Local design exports and private notes
 .stitch/
 .local-design/
 
-# Storybook build output
+# Storybook
 storybook-static/
 
-# Editor settings
+# Editor Settings - Don't push personal editor configs (except extensions.json)
 .vscode/*
 !.vscode/extensions.json
 .idea/
+*.swp
+*.swo
+*~
 
+# Optional: Local assets that are large or private
+# public/uploads/
+# .env.local

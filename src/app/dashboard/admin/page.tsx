@@ -19,7 +19,7 @@ export default function Page() {
       try {
         setLoading(true);
         const [usersRes, servicesRes, bookingsRes, paymentsRes] = await Promise.all([
-          fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/users/stats`, { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()).catch(() => null),
+          fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"}/users/stats`, { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()).catch(() => null),
           servicesApi.adminAll(token!, { limit: 1 }).catch(() => ({ meta: { total: 0 } })),
           bookingsApi.adminAll(token!, { limit: 1 }).catch(() => ({ meta: { total: 0 } })),
           paymentsApi.adminTransactions(token!, { limit: 1 }).catch(() => ({ data: { stats: { totalAmount: 0 } } })),

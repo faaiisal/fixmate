@@ -2,12 +2,12 @@
  * FixMate Frontend API Service Layer - FIXED for Failed to fetch resilience
  * Reusable layer to connect existing frontend UI to Express backend
  * Preserves all UI, Tailwind, layouts, navigation, forms
- * Uses NEXT_PUBLIC_API_URL env var (defaults to http://localhost:5000/api)
+ * Uses NEXT_PUBLIC_API_URL env var (defaults to http://localhost:8000/api)
  * Auth: Uses BetterAuth session user.id as Bearer token for dev (backend supports both real session token and userId fallback)
  */
 
 export const API_BASE =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
 
 export interface ApiResponse<T = unknown> {
   success: boolean;
@@ -81,7 +81,7 @@ export async function apiFetch<T>(
     if (isNetworkError) {
       console.error(`[apiFetch] Network error fetching ${url}:`, err);
       throw {
-        message: `Backend not reachable at ${url}. Please ensure backend server is running (cd fixmate-server && npm run build && node dist/server.js or npm run dev on port 5000). Also check CORS and disable Chrome extensions that block fetch (e.g. ad-blockers like frame_ant at chrome-extension://hoklmmgfnpapgjgcpechhaamimifchmp). Original: ${err.message}`,
+        message: `Backend not reachable at ${url}. Please ensure backend server is running (cd fixmate-server && npm run build && node dist/server.js or npm run dev on port 8000). Also check CORS and disable Chrome extensions that block fetch (e.g. ad-blockers like frame_ant at chrome-extension://hoklmmgfnpapgjgcpechhaamimifchmp). Original: ${err.message}`,
         status: 0,
         error: err,
       } as ApiError;
@@ -252,7 +252,7 @@ export const uploadApi = {
     } catch (err: any) {
       if (err instanceof TypeError && err.message.includes("Failed to fetch")) {
         throw {
-          message: `Upload backend not reachable at ${url}. Ensure backend running on 5000 and disable extensions blocking fetch (frame_ant). Original: ${err.message}`,
+          message: `Upload backend not reachable at ${url}. Ensure backend running on 8000 and disable extensions blocking fetch (frame_ant). Original: ${err.message}`,
           status: 0,
           error: err,
         } as ApiError;

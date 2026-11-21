@@ -48,9 +48,9 @@ export default function ServiceDetailsPage({ params }: { params: { id: string } 
         title: "Samsung Bespoke 4-Door French Door Refrigerator Repair (Fallback - Backend Unreachable)",
         description:
           "Backend not reachable at " +
-          (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api") +
+          (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api") +
           ". Please ensure backend server is running (cd fixmate-server && npm run dev on port 5000). " +
-          "If you see chrome-extension://hoklmmgfnpapgjgcpechhaamimifchmp/frame_ant error, disable ad-blocker / frame_ant extension that blocks fetch to localhost:5000. Original error: " +
+          "If you see chrome-extension://hoklmmgfnpapgjgcpechhaamimifchmp/frame_ant error, disable ad-blocker / frame_ant extension that blocks fetch to localhost:8000. Original error: " +
           msg,
         basePrice: 280,
         category: "Refrigerator",
@@ -135,7 +135,7 @@ export default function ServiceDetailsPage({ params }: { params: { id: string } 
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-12 text-center text-sm text-[#8C9098]">
-        Loading service details from backend {process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}...
+        Loading service details from backend {process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"}...
       </div>
     );
   }
@@ -156,7 +156,7 @@ export default function ServiceDetailsPage({ params }: { params: { id: string } 
           <p className="text-xs text-[#92400E] mt-1 whitespace-pre-wrap">{error}</p>
           <p className="text-xs text-[#92400E] mt-2">
             <strong>Fix:</strong> 1) Ensure backend is running: <code>cd fixmate-server && npm run build && node dist/server.js</code> or <code>npm run dev</code> on port 5000. 2) Check
-            <code> NEXT_PUBLIC_API_URL={process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}</code> in <code>fixmate/.env</code>. 3) Disable Chrome extensions that block fetch to localhost (the error stack shows{" "}
+            <code> NEXT_PUBLIC_API_URL={process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"}</code> in <code>fixmate/.env</code>. 3) Disable Chrome extensions that block fetch to localhost (the error stack shows{" "}
             <code>chrome-extension://hoklmmgfnpapgjgcpechhaamimifchmp/frame_ant</code> which is an ad-blocker/anti-fingerprint extension intercepting fetch). Try incognito without extensions. 4) Check backend CORS allows
             <code> {process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}</code>.
           </p>

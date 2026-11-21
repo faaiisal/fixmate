@@ -36,7 +36,7 @@ export default function Page() {
   const fetchStats = async () => {
     if (!token) return;
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/users/stats`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"}/users/stats`, {
         headers: { Authorization: `Bearer ${token}` },
       }).then(r => r.json());
       if (res.success) setStats(res.data);
