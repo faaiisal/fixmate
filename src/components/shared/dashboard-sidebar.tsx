@@ -1,73 +1,156 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import Image from "next/image";
+import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Wrench, ShoppingBag, Users, Settings, CreditCard, Package, ClipboardList, Shield } from "lucide-react";
+import {
+  LayoutDashboard,
+  ClipboardList,
+  Stethoscope,
+  Package,
+  CreditCard,
+  BarChart3,
+  Settings,
+  LogOut,
+  Users,
+  Shield,
+} from "lucide-react";
+import { authClient } from "@/lib/auth-client";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 type Role = "customer" | "technician" | "admin";
 
-const navByRole: Record<Role, { label: string; href: string; icon: React.ElementType }[]> = {
+// Latest version nav from admin_dashboard.html — 7 items + role extras
+// Icons mapped to Lucide per clean architecture
+const NAV_CONFIG: Record<
+  Role,
+  { label: string; href: string; icon: React.ElementType; workspace?: boolean }[]
+> = {
   customer: [
-    { label: "Overview", href: "/dashboard/customer", icon: LayoutDashboard },
-    { label: "My Bookings", href: "/dashboard/customer/bookings", icon: ClipboardList },
-    { label: "Payments", href: "/dashboard/customer/payments", icon: CreditCard },
-    { label: "Profile", href: "/dashboard/profile", icon: Settings },
+    { label: "Overview", href: "/dashboard/customer", icon: LayoutDashboard, workspace: true },
+    { label: "Bookings & Tracking", href: "/dashboard/customer/bookings", icon: ClipboardList, workspace: true },
+    { label: "Services Catalog", href: "/services", icon: Package, workspace: true },
+    { label: "Financial Escrow", href: "/dashboard/customer/payments", icon: CreditCard, workspace: true },
+    { label: "Settings", href: "/dashboard/profile", icon: Settings, workspace: true },
   ],
   technician: [
-    { label: "Dispatch", href: "/dashboard/technician", icon: LayoutDashboard },
-    { label: "Add Service", href: "/dashboard/technician/add-service", icon: Wrench },
-    { label: "My Services", href: "/dashboard/technician/my-services", icon: Package },
-    { label: "Requests", href: "/dashboard/technician/requests", icon: ShoppingBag },
-    { label: "Profile", href: "/dashboard/profile", icon: Settings },
+    { label: "Overview", href: "/dashboard/technician", icon: LayoutDashboard, workspace: true },
+    { label: "Diagnostic Dispatch", href: "/dashboard/technician/requests", icon: Stethoscope, workspace: true },
+    { label: "Services Catalog", href: "/dashboard/technician/my-services", icon: Package, workspace: true },
+    { label: "Financial Escrow", href: "/dashboard/technician", icon: CreditCard, workspace: true },
+    { label: "Analytics & Telemetry", href: "/dashboard/technician", icon: BarChart3, workspace: true },
+    { label: "Settings", href: "/dashboard/profile", icon: Settings, workspace: true },
   ],
   admin: [
-    { label: "Operations", href: "/dashboard/admin", icon: LayoutDashboard },
-    { label: "Users", href: "/dashboard/admin/users", icon: Users },
-    { label: "Services", href: "/dashboard/admin/services", icon: Package },
-    { label: "Bookings", href: "/dashboard/admin/bookings", icon: ClipboardList },
-    { label: "Transactions", href: "/dashboard/admin/transactions", icon: CreditCard },
-    { label: "Profile", href: "/dashboard/profile", icon: Settings },
+    { label: "Overview", href: "/dashboard/admin", icon: LayoutDashboard, workspace: true },
+    { label: "Bookings & Tracking", href: "/dashboard/admin/bookings", icon: ClipboardList, workspace: true },
+    { label: "Diagnostic Dispatch", href: "/dashboard/admin/bookings", icon: Stethoscope, workspace: true },
+    { label: "Services Catalog", href: "/dashboard/admin/services", icon: Package, workspace: true },
+    { label: "Financial Escrow", href: "/dashboard/admin/transactions", icon: CreditCard, workspace: true },
+    { label: "Analytics & Telemetry", href: "/dashboard/admin", icon: BarChart3, workspace: true },
+    { label: "Users", href: "/dashboard/admin/users", icon: Users, workspace: true },
+    { label: "Settings", href: "/dashboard/profile", icon: Settings, workspace: true },
   ],
 };
 
 export function DashboardSidebar({ role = "customer" as Role }) {
   const pathname = usePathname();
-  const items = navByRole[role] || navByRole.customer;
+  const router = useRouter();
+  const items = NAV_CONFIG[role] || NAV_CONFIG.customer;
+
+  const handleSignOut = async () => {
+    try {
+      await authClient.signOut({
+        fetchOptions: {
+          onSuccess: () => {
+            toast.success("Signed out");
+            router.push("/sign-in");
+          },
+        },
+      });
+    } catch {
+      toast.error("Failed to sign out");
+      router.push("/sign-in");
+    }
+  };
 
   return (
     <div className="w-full md:w-64 bg-white border-r border-[#E5E0DF] flex flex-col h-full">
-      <div className="h-16 px-6 flex items-center gap-3 border-b border-[#E5E0DF]">
-        <div className="w-8 h-8 rounded-lg bg-[#F26A36] flex items-center justify-center text-white font-bold">F</div>
-        <span className="font-heading font-bold">FixMate</span>
-        <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#F6F3F2] border border-[#E5E0DF]">{role.toUpperCase()}</span>
+      {/* Header: real logo 120px + role badge — per latest version, no FixVault footer logo */}
+      <div className="h-[72px] px-4 flex items-center gap-3 border-b border-[#E5E0DF] shrink-0">
+        <Link href="/" className="flex items-center gap-2" aria-label="FixMate Dashboard Home">
+          <Image src="/fixmate-logo.png" alt="FixMate" width={120} height={64} className="w-[120px] h-auto object-contain" priority />
+        </Link>
+        <span className="ml-auto text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#F6F3F2] border border-[#E5E0DF] text-[#6c6764] uppercase tracking-wider">
+          {role}
+        </span>
       </div>
-      <nav className="flex-1 p-4 space-y-1">
-        {items.map((item) => {
-          const active = pathname === item.href || pathname.startsWith(item.href + "/");
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
-                active ? "bg-[#FFF1EC] text-[#F26A36] border border-[#FFD6C2]" : "text-[#55595F] hover:bg-[#F6F3F2] hover:text-[#14121B]"
-              )}
-            >
-              <item.icon className="w-4 h-4" />
-              {item.label}
-            </Link>
-          );
-        })}
-      </nav>
-      <div className="p-4 border-t border-[#E5E0DF]">
-        <div className="rounded-xl bg-[#FCF9F8] border border-[#E5E0DF] p-3">
-          <div className="flex items-center gap-2 text-xs font-mono text-[#8C9098]">
-            <Shield className="w-3 h-3" />
-            FixVault Escrow Protected
-          </div>
-          <div className="mt-2 text-[10px] font-mono text-[#8C9098]">TX: 0x8F2A...991C</div>
+
+      {/* Workspace label + nav - matches admin_dashboard.html latest version */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-6">
+        <div>
+          <span className="px-3 text-[11px] font-mono font-semibold text-[#8C9098] uppercase tracking-wider">Workspace</span>
+          <nav className="mt-2 space-y-1">
+            {items.map((item) => {
+              const active = pathname === item.href || pathname.startsWith(item.href + "/");
+              return (
+                <Link
+                  key={item.href + item.label}
+                  href={item.href}
+                  className={cn(
+                    "flex items-center gap-3 px-3 py-2.5 rounded-full text-sm font-medium transition-all",
+                    active
+                      ? "bg-[#FFF1EC] text-[#F26A36] border border-[#FFD6C2] shadow-sm"
+                      : "text-[#55595F] hover:bg-[#F6F3F2] hover:text-[#14121B] border border-transparent"
+                  )}
+                >
+                  <item.icon className="w-[18px] h-[18px]" />
+                  {item.label}
+                </Link>
+              );
+            })}
+          </nav>
         </div>
+      </div>
+
+      {/* Footer: User card + Sign Out — replaces old FixVault logo box */}
+      <div className="p-3 border-t border-[#E5E0DF] bg-[#FCF9F8] space-y-3 shrink-0">
+        {/* User */}
+        <div className="flex items-center gap-3 p-2 rounded-xl bg-white border border-[#E5E0DF]">
+          <Avatar className="w-9 h-9 border border-[#E7E7E9]">
+            <AvatarFallback className="bg-[#FFF1EC] text-[#F26A36] font-bold text-xs">
+              {role === "admin" ? "A" : role === "technician" ? "T" : "C"}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex-1 min-w-0">
+            <div className="text-sm font-semibold truncate">Alex Miller</div>
+            <div className="text-[11px] font-mono text-[#8C9098] truncate">
+              {role}@fixmate.io • {role.toUpperCase()}
+            </div>
+          </div>
+        </div>
+
+        {/* Sign Out + FixVault mini */}
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleSignOut}
+            className="flex-1 rounded-full bg-white border-[#E5E0DF] hover:bg-[#FEF2F2] hover:text-[#ba1a1a] hover:border-[#ffdad6] text-xs"
+          >
+            <LogOut className="w-3.5 h-3.5 mr-1.5" />
+            Sign Out
+          </Button>
+          <div className="flex-1 flex items-center justify-center gap-1.5 px-2 py-2 rounded-full bg-white border border-[#E5E0DF] text-[10px] font-mono text-[#8C9098]">
+            <Shield className="w-3 h-3" />
+            Escrow
+          </div>
+        </div>
+
+        <div className="text-[10px] font-mono text-[#8C9098] text-center">TX: 0x8F2A...991C • TLS 1.3</div>
       </div>
     </div>
   );

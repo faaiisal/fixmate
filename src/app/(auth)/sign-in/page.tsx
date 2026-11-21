@@ -27,16 +27,6 @@ export default function SignInPage() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  const handleSignIn = async (data: SignInInput) => {
-    const { data: SignInRespone, error } = await authClient.signIn.email({
-      email: data.email,
-      password: data.password,
-      rememberMe: true,
-      callbackURL: "/",
-    });
-    console.log('sign in response', SignInRespone, error);
-  };
-
   const form = useForm<SignInInput>({
     resolver: zodResolver(signInSchema),
     defaultValues: { email: "", password: "", remember: false },
