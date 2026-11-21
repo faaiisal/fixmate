@@ -73,6 +73,3 @@ export function Navbar() {
     </header>
   );
 }
-
-// Keep backward compatibility for old import name PublicNavbar
-export const PublicNavbar = Navbar;

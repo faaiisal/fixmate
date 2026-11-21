@@ -52,6 +52,3 @@ export function Footer() {
     </footer>
   );
 }
-
-// Backward compatibility
-export const PublicFooter = Footer;
