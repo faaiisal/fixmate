@@ -1,6 +1,4 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# Dependencies & Package Managers
+# Dependencies & Package Managers - NEVER push node_modules (85+ MB)
 node_modules/
 .pnp/
 .pnp.*
@@ -10,64 +8,51 @@ node_modules/
 !.yarn/releases
 !.yarn/versions
 
-# Testing & Coverage
-/coverage
+# Production Build Output - NEVER push compiled JS (regenerated via build)
+build/
+dist/
+.next/
+out/
+.turbo/
 coverage/
 .nyc_output/
+storybook-static/
 
-# Next.js Build Output - Never push compiled app
-/.next/
-/out/
-/build
-/dist
-/.dist
-.turbo/
-
-# Production Misc
-.DS_Store
-*.pem
-Thumbs.db
-.DS_Store?
-ehthumbs.db
-
-# Debug Logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
-
-# Environment Variables - MUST NOT push secrets to GitHub
+# Environment Variables - MUST NOT push secrets (DB URIs, API keys, secrets)
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 .env.*.local
-# Allow example file with placeholders only
+# Allow example file with placeholders only - must be tracked
 !.env.example
 
-# Vercel
+# Logs - Never push logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# OS & System Files - Never push OS junk
+.DS_Store
+.DS_Store?
+*.pem
+Thumbs.db
+ehthumbs.db
+Icon?
+
+# Deployment
 .vercel/
 
-# TypeScript
+# TypeScript Build Info
 *.tsbuildinfo
 next-env.d.ts
-tsconfig.tsbuildinfo
 
-# OS Files
-.DS_Store
-Thumbs.db
-
-# Local-only design resources — DO NOT PUSH
-fixmate-local/
-.stitch/
-.local-design/
-
-# Storybook
-storybook-static/
-
-# Editor Settings - Don't push personal editor configs (except extensions.json)
+# Editor Settings - Don't push personal editor configs (keep extensions.json)
 .vscode/*
 !.vscode/extensions.json
 .idea/
@@ -75,6 +60,13 @@ storybook-static/
 *.swo
 *~
 
-# Optional: Local assets that are large or private
-# public/uploads/
-# .env.local
+# Local-only Design Resources - DO NOT PUSH (private notes, local exports)
+fixmate-local/
+.stitch/
+.local-design/
+
+# Optional: Local database dumps, large files - DO NOT PUSH
+*.dump
+*.sql
+*.sqlite
+*.db
