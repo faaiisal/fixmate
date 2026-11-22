@@ -5,7 +5,7 @@ import { CardContainer } from "@/components/ui/card-container";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { usersApi } from "@/lib/api";
+import { usersApi, uploadApi } from "@/lib/api";
 import { useSession } from "@/lib/auth-client";
 import { toast } from "sonner";
 
@@ -16,6 +16,8 @@ export default function Page() {
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState({ name: "", phone: "", address: "", bio: "", profileImage: "" });
+  const [uploading, setUploading] = useState(false);
+  const [preview, setPreview] = useState<string | null>(null);
 
   const fetchProfile = async () => {
     if (!token) return;
@@ -31,6 +33,9 @@ export default function Page() {
         bio: data.bio || "",
         profileImage: data.profileImage || data.image || "",
       });
+      if (data.profileImage || data.image) {
+        setPreview(data.profileImage || data.image);
+      }
     } catch (err: any) {
       toast.error(err.message || "Failed to fetch profile");
     } finally {
@@ -39,6 +44,38 @@ export default function Page() {
   };
 
   useEffect(() => { fetchProfile(); }, [token]);
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("File too large. Max 5MB");
+      return;
+    }
+    if (!["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"].includes(file.type)) {
+      toast.error("Invalid file type");
+      return;
+    }
+    const localUrl = URL.createObjectURL(file);
+    setPreview(localUrl);
+    if (!token) {
+      toast.error("Please sign in");
+      return;
+    }
+    setUploading(true);
+    try {
+      const res = await uploadApi.image(token, file);
+      const url = (res.data as any)?.url || (res.data as any)?.displayUrl;
+      if (url) {
+        setForm({ ...form, profileImage: url });
+        toast.success("Profile image uploaded to ImgBB");
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Upload failed - paste URL manually");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handleUpdate = async () => {
     if (!token) return;
@@ -88,12 +125,26 @@ export default function Page() {
             <label className="text-xs font-mono text-[#8C9098]">BIO</label>
             <Textarea value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} className="mt-1" />
           </div>
-          <div>
-            <label className="text-xs font-mono text-[#8C9098]">PROFILE IMAGE URL (ImgBB)</label>
-            <Input value={form.profileImage} onChange={(e) => setForm({ ...form, profileImage: e.target.value })} className="mt-1" placeholder="https://i.ibb.co/.../image.jpg" />
+          <div className="space-y-2">
+            <label className="text-xs font-mono text-[#8C9098]">PROFILE IMAGE — Upload via ImgBB (file input)</label>
+            <div className="flex gap-2 items-center">
+              <Input type="file" accept="image/jpeg,image/jpg,image/png,image/webp,image/gif" onChange={handleFileUpload} className="flex-1" />
+              {uploading && <span className="text-xs text-[#F26A36]">Uploading...</span>}
+            </div>
+            {(preview || form.profileImage) && (
+              <div className="mt-2 flex gap-4 items-start">
+                <div className="w-24 h-24 bg-[#F6F3F2] rounded-full border overflow-hidden flex items-center justify-center">
+                  <img src={form.profileImage || preview || ""} alt="Avatar preview" className="w-full h-full object-cover" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-[10px] font-mono text-[#8C9098] break-all">URL: {form.profileImage || "Uploading..."}</p>
+                  <Input placeholder="Or paste ImgBB URL https://i.ibb.co/..." value={form.profileImage} onChange={(e) => setForm({ ...form, profileImage: e.target.value })} className="mt-2 text-xs" />
+                </div>
+              </div>
+            )}
           </div>
-          <Button className="bg-[#F26A36]" onClick={handleUpdate}>Update Profile</Button>
-          <div className="text-[10px] font-mono text-[#8C9098]">Backend: PUT /api/users/profile — preserves BetterAuth session, updates user collection with address, bio, profileImage, phone, name</div>
+          <Button className="bg-[#F26A36]" onClick={handleUpdate} disabled={uploading}>Update Profile</Button>
+          <div className="text-[10px] font-mono text-[#8C9098]">Backend: PUT /api/users/profile — preserves BetterAuth session, updates user collection with address, bio, profileImage, phone, name. Image upload via ImgBB file input.</div>
         </div>
       </CardContainer>
 
