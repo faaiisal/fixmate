@@ -20,7 +20,10 @@ export default function ServicesPage() {
   const [category, setCategory] = useState<string>("All");
   const [liveCount, setLiveCount] = useState<number>(mockServices.length);
 
-  const categories = ["All", "Refrigerator", "Washing Machine", "Laptop", "Smartphone", "AC", "TV", "Laptop & PC", "Air Conditioner", "Television", "Electrical Appliances"];
+  // Clean architecture: only canonical backend categories (7) + All = 8
+  // Backend has: Refrigerator, Washing Machine, Laptop & PC, Smartphone, Air Conditioner, Television, Electrical Appliances
+  // Removed duplicates: Laptop (use Laptop & PC), AC (use Air Conditioner), TV (use Television) — 0 data when clicked
+  const categories = ["All", "Refrigerator", "Washing Machine", "Laptop & PC", "Smartphone", "Air Conditioner", "Television", "Electrical Appliances"];
 
   useEffect(() => {
     async function fetchServices() {
@@ -36,14 +39,16 @@ export default function ServicesPage() {
         const backendServices = (res.data || []) as any[];
 
         if (backendServices.length > 0) {
-          // Map backend _id, basePrice, approvalStatus, isAvailable to frontend card props
+          // Map backend data to frontend card props
+          // FIX: Use local WebP from src/app/images/ instead of backend ImgBB https://i.ibb.co/... per user request
+          // Backend image s.image (https://i.ibb.co/...) is ignored, local category image will be used via ServiceCard getCategoryImage()
           const mapped = backendServices.map((s: any) => ({
             id: s._id,
             title: s.title,
             description: s.description,
             price: s.basePrice,
             category: s.category,
-            image: s.image,
+            image: undefined, // Force local WebP category image, not remote ImgBB
             technician: s.technicianId
               ? { name: `Tech ${s.technicianId.toString().slice(-4)}`, rating: 4.9, verified: true }
               : undefined,
@@ -94,7 +99,7 @@ export default function ServicesPage() {
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold font-heading">Service Hub</h1>
-            <p className="text-sm text-[#55595F]">Browse verified repairs with escrow protection — integrated with backend {process.env.NEXT_PUBLIC_API_URL}</p>
+            <p className="text-sm text-[#55595F]">Browse verified repairs with escrow protection</p>
           </div>
           <div className="flex gap-2">
             <div className="relative flex-1 lg:w-80">
