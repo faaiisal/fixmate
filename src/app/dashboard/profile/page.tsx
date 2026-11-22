@@ -99,7 +99,22 @@ export default function Page() {
 
       <CardContainer className="p-5">
         <h3 className="font-semibold mb-2">Current Session Info</h3>
-        <pre className="text-xs bg-[#F6F3F2] p-3 rounded overflow-auto">{JSON.stringify({ sessionUser, token, profile: profile ? { _id: profile._id, name: profile.name, email: profile.email, role: profile.role, phone: profile.phone, address: profile.address } : null }, null, 2)}</pre>
+        <div className="text-xs bg-[#F6F3F2] p-3 rounded">
+          <div className="space-y-1">
+            <div>
+              <span className="font-mono text-[#8C9098]">Email:</span>{" "}
+              {sessionUser?.email || "N/A"}
+            </div>
+            <div>
+              <span className="font-mono text-[#8C9098]">Role:</span>{" "}
+              {sessionUser?.role || profile?.role || "N/A"}
+            </div>
+            <div>
+              <span className="font-mono text-[#8C9098]">Status:</span> Authenticated via
+              BetterAuth session cookie
+            </div>
+          </div>
+        </div>
       </CardContainer>
     </div>
   );

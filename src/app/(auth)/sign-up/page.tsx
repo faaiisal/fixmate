@@ -24,12 +24,11 @@ type FormValues = {
   terms: boolean;
 };
 
-type Role = "customer" | "technician" | "admin";
+type Role = "customer" | "technician";
 
 const roleOptions: { id: Role; label: string; desc: string; icon: string }[] = [
   { id: "customer", label: "Customer", desc: "Book diagnostics, monitor live precision dispatches, and enjoy automated escrow protection.", icon: "👤" },
   { id: "technician", label: "Technician", desc: "Receive field dispatches, benchmark diagnostics equipment, and withdraw weekly guaranteed earnings.", icon: "🔧" },
-  { id: "admin", label: "Admin", desc: "Manage platform, SLA governance, centralized billing, and enterprise security.", icon: "🏢" },
 ];
 
 function generateStrongPassword() {
@@ -104,7 +103,6 @@ export default function SignUpPage() {
 
       toast.success("Account created! Redirecting...");
       if (role === "technician") router.push("/dashboard/technician");
-      else if (role === "admin") router.push("/dashboard/admin");
       else router.push("/dashboard/customer");
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : "Something went wrong");
@@ -159,7 +157,7 @@ export default function SignUpPage() {
               <ShieldCheck className="w-3 h-3" /> ESCROW ACTIVE
             </span>
           </div>
-          <div className="grid grid-cols-3 gap-1.5 p-1 bg-[#F4F2F1] rounded-xl border border-[#E7E7E9]">
+          <div className="grid grid-cols-2 gap-1.5 p-1 bg-[#F4F2F1] rounded-xl border border-[#E7E7E9]">
             {roleOptions.map((r) => (
               <button
                 key={r.id}
