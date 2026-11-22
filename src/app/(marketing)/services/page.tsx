@@ -39,16 +39,16 @@ export default function ServicesPage() {
         const backendServices = (res.data || []) as any[];
 
         if (backendServices.length > 0) {
-          // Map backend data to frontend card props
-          // FIX: Use local WebP from src/app/images/ instead of backend ImgBB https://i.ibb.co/... per user request
-          // Backend image s.image (https://i.ibb.co/...) is ignored, local category image will be used via ServiceCard getCategoryImage()
+          // Map backend _id, basePrice, approvalStatus, isAvailable to frontend card props
+          // FIXED: Use real backend image (Unsplash free) for both list and details - same image per ID, no duplicate
+          // Backend now has unique Unsplash image per service (updated via MongoDB), e.g., Microwave Oven -> unique URL
           const mapped = backendServices.map((s: any) => ({
             id: s._id,
             title: s.title,
             description: s.description,
             price: s.basePrice,
             category: s.category,
-            image: undefined, // Force local WebP category image, not remote ImgBB
+            image: s.image, // Real backend image from Unsplash/Pixabay free - same on list and details
             technician: s.technicianId
               ? { name: `Tech ${s.technicianId.toString().slice(-4)}`, rating: 4.9, verified: true }
               : undefined,
