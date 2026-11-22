@@ -53,31 +53,29 @@ export const auth = betterAuth({
   // Email & Password
   emailAndPassword: {
     enabled: true,
-    user: {
-      additionalFields: {
-        role: {
-          type: ['customer', 'admin', 'technician'],
-          input: false,
-        },
-      },
-    },
     requireEmailVerification: false, // Set true if you want to enforce verification
     minPasswordLength: 8,
     autoSignIn: true, // Auto sign in after sign-up
   },
 
-  // Social Providers
+  // Social Providers - only include if env vars are set to avoid 500 on missing credentials
   socialProviders: {
-    google: {
-      clientId: process.env.GOOGLE_CLIENT_ID as string,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
-      // Optional: additional scopes if needed
-      // scope: ["email", "profile"],
-    },
-    github: {
-      clientId: process.env.GITHUB_CLIENT_ID as string,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET as string,
-    },
+    ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
+      ? {
+          google: {
+            clientId: process.env.GOOGLE_CLIENT_ID as string,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+          },
+        }
+      : {}),
+    ...(process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET
+      ? {
+          github: {
+            clientId: process.env.GITHUB_CLIENT_ID as string,
+            clientSecret: process.env.GITHUB_CLIENT_SECRET as string,
+          },
+        }
+      : {}),
   },
 
   // User: extend with FixMate role field
