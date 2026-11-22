@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { servicesApi, bookingsApi } from "@/lib/api";
+import { servicesApi, bookingsApi, useAuthToken } from "@/lib/api";
 import { useSession } from "@/lib/auth-client";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -125,6 +125,12 @@ export default function ServiceDetailsPage({ params }: { params: { id: string } 
       router.push("/sign-in");
       return;
     }
+    const realToken = useAuthToken(session);
+    if (!realToken) {
+      toast.error("Session expired, please sign in again");
+      router.push("/sign-in");
+      return;
+    }
     if (!phone || phone.length < 10) {
       toast.error("Phone must be at least 10 digits");
       return;
@@ -145,7 +151,7 @@ export default function ServiceDetailsPage({ params }: { params: { id: string } 
 
       const description = `${fault} [Time pref: ${timeSlot}]`;
 
-      await bookingsApi.create("", {
+      await bookingsApi.create(realToken, {
         serviceId: id,
         phone,
         address,

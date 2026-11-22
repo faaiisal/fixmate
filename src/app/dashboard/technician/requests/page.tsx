@@ -5,14 +5,14 @@ import { CardContainer } from "@/components/ui/card-container";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { StatusBadge } from "@/components/modules/status-badge";
-import { bookingsApi } from "@/lib/api";
+import { bookingsApi, useAuthToken } from "@/lib/api";
 import { useSession } from "@/lib/auth-client";
 import { toast } from "sonner";
 import { formatCurrency } from "@/lib/utils";
 
 export default function Page() {
   const { data: session } = useSession();
-  const token = (session?.user as any)?.id || null;
+  const token = useAuthToken(session);
   const [bookings, setBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("All");

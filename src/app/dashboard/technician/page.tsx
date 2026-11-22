@@ -3,12 +3,12 @@
 import { useEffect, useState } from "react";
 import { CardContainer } from "@/components/ui/card-container";
 import { StatCard } from "@/components/modules/stat-card";
-import { servicesApi, bookingsApi } from "@/lib/api";
+import { servicesApi, bookingsApi, useAuthToken } from "@/lib/api";
 import { useSession } from "@/lib/auth-client";
 
 export default function Page() {
   const { data: session } = useSession();
-  const token = (session?.user as any)?.id || null;
+  const token = useAuthToken(session);
   const [myServices, setMyServices] = useState<any[]>([]);
   const [assigned, setAssigned] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);

@@ -145,10 +145,19 @@ export async function apiFetch<T>(
 }
 
 // Helper to get token from session hook
-// Phase 1 Fix: Never use user ID as Bearer token per assignment rules
-// Authentication now relies on BetterAuth session cookie via credentials:include
-export function useAuthToken(_session: any): string | null {
-  return null;
+// Phase 7 Fix: Return real BetterAuth session token, not user ID
+// Previously returned null to rely on cookie, but cookie cross-port (3000->8000) may not be sent reliably
+// Real session token is random string (not ObjectId), so backend will treat as session lookup, not dev bypass
+// This fixes "Unauthorized: Authentication required" when customer clicks Request Repair
+export function useAuthToken(session: any): string | null {
+  // BetterAuth useSession returns { session, user } or { session: { token }, user: {...} }
+  // Try multiple shapes for compatibility
+  return (
+    session?.session?.token ||
+    session?.token ||
+    session?.data?.session?.token ||
+    null
+  );
 }
 
 // === Users API ===

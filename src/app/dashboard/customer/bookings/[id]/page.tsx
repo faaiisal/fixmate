@@ -4,7 +4,7 @@ import { useEffect, useState, use } from "react";
 import { CardContainer } from "@/components/ui/card-container";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/modules/status-badge";
-import { bookingsApi, paymentsApi } from "@/lib/api";
+import { bookingsApi, paymentsApi, useAuthToken } from "@/lib/api";
 import { useSession } from "@/lib/auth-client";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -15,7 +15,7 @@ export default function BookingDetailsPage({ params }: { params: { id: string } 
   const id = resolvedParams.id;
 
   const { data: session } = useSession();
-  const token = (session?.user as any)?.id || null;
+  const token = useAuthToken(session);
   const router = useRouter();
 
   const [booking, setBooking] = useState<any>(null);

@@ -5,13 +5,13 @@ import { CardContainer } from "@/components/ui/card-container";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { usersApi, uploadApi } from "@/lib/api";
+import { usersApi, uploadApi, useAuthToken } from "@/lib/api";
 import { useSession } from "@/lib/auth-client";
 import { toast } from "sonner";
 
 export default function Page() {
   const { data: session } = useSession();
-  const token = (session?.user as any)?.id || null;
+  const token = useAuthToken(session);
   const sessionUser = session?.user as any;
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
