@@ -21,19 +21,28 @@ const { db, client } = getDbSync();
 export const auth = betterAuth({
   appName: "FixMate",
 
-  // Base URL: fallback to BETTER_AUTH_URL env
+  // Base URL: Use VERCEL_URL in production, fallback to envs, then localhost for dev
+  // VERCEL_URL is auto-set by Vercel to your deployment URL (without https)
   baseURL:
     process.env.BETTER_AUTH_URL ||
     process.env.NEXT_PUBLIC_APP_URL ||
-    "http://localhost:3000",
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000"),
 
   // Secret: required in production
   secret: process.env.BETTER_AUTH_SECRET,
 
-  // Trusted origins: baseURL is trusted by default, add frontend URL
+  // Trusted origins: Include localhost for dev, vercel.app for production, and live frontend URLs
   trustedOrigins: [
-    process.env.BETTER_AUTH_URL || "http://localhost:3000",
-    process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+    process.env.BETTER_AUTH_URL,
+    process.env.NEXT_PUBLIC_APP_URL,
+    process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined,
+    "http://localhost:3000",
+    "http://localhost:8000",
+    "http://127.0.0.1:3000",
+    "https://fixmate-psi.vercel.app",
+    "https://*.vercel.app",
+    "https://fixmate-server-snowy.vercel.app",
+    "https://fixmate-server.vercel.app",
   ].filter(Boolean) as string[],
 
   // Database: MongoDB adapter with transactions (pass client for replica set/Atlas)
