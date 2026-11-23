@@ -2,87 +2,26 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { CardContainer } from "@/components/ui/card-container";
-import { Badge } from "@/components/ui/badge";
+import { FeaturedServices } from "@/components/modules/featured-services";
 
 // WebP images from src/app/images/ - all .webp per requirement
 import heroImage from "@/app/images/hero-image.webp";
-import techMarcus from "@/app/images/technician-marcus.webp";
-import techFarhan from "@/app/images/technician-farhan.webp";
 import techElena from "@/app/images/technician-elena.webp";
-import techDavid from "@/app/images/technician-david.webp";
-import techZubair from "@/app/images/technician-zubair.webp";
-import techSarah from "@/app/images/technician-sarah.webp";
 import customerDavid from "@/app/images/customer-david-k.webp";
 import customerPriya from "@/app/images/customer-priya-mehta.webp";
 import customerCarlos from "@/app/images/customer-carlos-rivera.webp";
 
-// --- Mock Data: Backend-ready structure (will be fetched from /api/services later) ---
+// Category shortcuts only — no counts or records are fabricated here. Each link
+// opens the real backend-filtered catalog.
 const categories = [
-  { icon: "📱", label: "Smartphone", count: 28, desc: "Screen, battery & logic board", techImg: "smartphone" },
-  { icon: "💻", label: "Laptop & PC", count: 34, desc: "Diagnostics, motherboard, display", techImg: "laptop" },
-  { icon: "❄️", label: "Air Conditioners", count: 19, desc: "Inverter gas, coils, PCB", techImg: "ac" },
-  { icon: "🧊", label: "Refrigerator", count: 22, desc: "Compressor, thermostat, frost fix", techImg: "refrigerator" },
-  { icon: "📺", label: "Television", count: 16, desc: "OLED, backlight, power boards", techImg: "tv" },
-  { icon: "🌀", label: "Washing Machine", count: 14, desc: "Drum, motor, drainage pump", techImg: "washing" },
-  { icon: "⚡", label: "Electrical", count: 21, desc: "Breakers, wiring, surge protection", techImg: "electrical" },
-  { icon: "💧", label: "Kitchen & Water", count: 11, desc: "Motors, filters, RO systems", techImg: "kitchen" },
-];
-
-const featuredServices = [
-  {
-    id: "refrigerator-smart-french",
-    category: "Refrigerator",
-    visit: "Doorstep Visit",
-    title: "Smart French-Door Refrigerator Diagnostics & Inverter Fix",
-    desc: "Full sensor loop inspection, dual evaporator valve recalibration, inverter compressor board test, and frost defrost heating cycle restore.",
-    tech: { name: "Marcus Vance", rating: "4.98 • 412 fixes", image: techMarcus, verified: true },
-    price: 35,
-  },
-  {
-    id: "ac-inverter-split",
-    category: "Air Conditioners",
-    visit: "Doorstep Visit",
-    title: "Inverter Split AC Deep Chemical Wash & Gas Top-Up",
-    desc: "High-pressure jet wash, antimicrobial coil conditioning, R32/R410A precision digital manifold pressure test, and suction leak fix.",
-    tech: { name: "Farhan Ahmed", rating: "4.95 • 380 fixes", image: techFarhan, verified: true },
-    price: 40,
-  },
-  {
-    id: "laptop-macbook-microsolder",
-    category: "Laptop & PC",
-    visit: "Doorstep or Lab",
-    title: "MacBook Pro & High-End Laptop Logic Board Microsoldering",
-    desc: "Microscope SMD inspection, shorted power rail repair (PPBUS_G3H), GPU reballing, ultrasonic liquid spill cleaning, and thermal pad upgrade.",
-    tech: { name: "Elena Rostova", rating: "4.99 • 620 fixes", image: techElena, verified: true },
-    price: 45,
-  },
-  {
-    id: "washing-machine-front-load",
-    category: "Washing Machine",
-    visit: "Doorstep Visit",
-    title: "Front-Load Washing Machine DirectDrive Motor & Drum Repair",
-    desc: "Drum bearing replacement, vibration damper balancing, BLDC motor hall sensor reset, and drain pump impeller unclogging.",
-    tech: { name: "David Kim", rating: "4.92 • 290 fixes", image: techDavid, verified: true },
-    price: 30,
-  },
-  {
-    id: "water-purifier-ro",
-    category: "Water Purifier",
-    visit: "Doorstep Visit",
-    title: "Multi-Stage Commercial RO Water Purifier Membrane Overhaul",
-    desc: "RO membrane permeability benchmark, booster pump PSI testing, sediment/carbon filter replacement, and digital TDS calibration.",
-    tech: { name: "Zubair Mahmud", rating: "4.96 • 195 fixes", image: techZubair, verified: true },
-    price: 25,
-  },
-  {
-    id: "smartphone-oled",
-    category: "Smartphone",
-    visit: "Doorstep 30-Min Fix",
-    title: "Flagship Smartphone OLED Assembly & Precision Sensor Repair",
-    desc: "Original color-calibrated OLED display swap, TrueTone programming, ultrasonic fingerprint alignment, and IP68 waterproof reseal.",
-    tech: { name: "Sarah Jenkins", rating: "4.97 • 510 fixes", image: techSarah, verified: true },
-    price: 29,
-  },
+  { icon: "📱", label: "Smartphone", desc: "Screen, battery & logic board" },
+  { icon: "💻", label: "Laptop & PC", desc: "Diagnostics, motherboard, display" },
+  { icon: "❄️", label: "Air Conditioners", desc: "Inverter gas, coils, PCB" },
+  { icon: "🧊", label: "Refrigerator", desc: "Compressor, thermostat, frost fix" },
+  { icon: "📺", label: "Television", desc: "OLED, backlight, power boards" },
+  { icon: "🌀", label: "Washing Machine", desc: "Drum, motor, drainage pump" },
+  { icon: "⚡", label: "Electrical", desc: "Breakers, wiring, surge protection" },
+  { icon: "💧", label: "Kitchen & Water", desc: "Motors, filters, RO systems" },
 ];
 
 const transparencySteps = [
@@ -98,7 +37,7 @@ const transparencySteps = [
     step: "02",
     label: "Step 02",
     title: "Send a Repair Request",
-    desc: "Lock in your preferred date, transparent upfront quote, and verified slot with live ETA proximity alerts.",
+    desc: "Lock in your preferred date and send a repair request. Follow every recorded status change from your dashboard.",
     footer: "Zero pre-charge",
     icon: "📅",
   },
@@ -133,8 +72,8 @@ const trustPillars = [
     icon: "🧾",
   },
   {
-    title: "Live Trackable Telemetry",
-    desc: "Live GPS engineer arrival updates, step-by-step digital diagnostic checklist, and complete PDF test reports.",
+    title: "Trackable Status Updates",
+    desc: "Follow each booking through Requested, Accepted, In progress, Completed and Paid. Status values come from the booking record — no inferred GPS or ETA.",
     icon: "📡",
   },
   {
@@ -205,7 +144,7 @@ export default function HomePage() {
               </h1>
 
               <p className="font-sans text-base sm:text-lg text-[#737373] max-w-2xl leading-relaxed">
-                From high-efficiency refrigerators and inverter HVAC systems to MacBooks and smartphones. Book in under 60 seconds, track in real time, and pay only after complete verification.
+                From high-efficiency refrigerators and inverter HVAC systems to MacBooks and smartphones. Book in under 60 seconds, follow every recorded status update, and pay only after completion is verified.
               </p>
 
               <div className="flex flex-wrap items-center gap-4 pt-2">
@@ -225,7 +164,7 @@ export default function HomePage() {
                   <span className="font-mono text-xs font-semibold uppercase tracking-wider text-[#F26A36] flex items-center gap-1.5">
                     ⚡ Instant Dispatch Triage
                   </span>
-                  <span className="font-mono text-[11px] text-[#737373]">Real-time GPS Proximity</span>
+                  <span className="font-mono text-[11px] text-[#737373]">Backend-verified service catalog</span>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
                   <div className="sm:col-span-5 relative">
@@ -376,7 +315,7 @@ export default function HomePage() {
                     <div className="w-12 h-12 rounded-lg bg-orange-50 group-hover:bg-[#F26A36] group-hover:text-white flex items-center justify-center text-[#F26A36] transition-colors text-2xl">
                       {cat.icon}
                     </div>
-                    <span className="font-mono text-xs text-[#737373] group-hover:text-[#F26A36]">{cat.count} Techs</span>
+                    <span className="font-mono text-xs text-[#737373] group-hover:text-[#F26A36]">Browse →</span>
                   </div>
                   <div>
                     <h3 className="font-heading text-base font-semibold group-hover:text-[#F26A36] transition-colors">{cat.label}</h3>
@@ -406,43 +345,7 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featuredServices.map((service) => (
-              <div key={service.id} className="rounded-xl bg-white border border-[#E7E7E9] p-6 flex flex-col justify-between shadow-sm hover:shadow-md transition-all">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <Badge variant="secondary" className="bg-orange-50 text-[#F26A36] font-mono text-xs">
-                      {service.category}
-                    </Badge>
-                    <span className="inline-flex items-center gap-1 font-mono text-xs text-[#737373]">📍 {service.visit}</span>
-                  </div>
-                  <h3 className="font-heading text-lg font-bold tracking-tight leading-tight">{service.title}</h3>
-                  <p className="text-xs sm:text-sm text-[#737373] leading-relaxed line-clamp-3">{service.desc}</p>
-
-                  <div className="p-3 rounded-lg bg-[#F7F7F8] border border-[#E7E7E9] flex items-center gap-3">
-                    <Image src={service.tech.image} alt={service.tech.name} width={32} height={32} className="w-8 h-8 rounded-full object-cover" />
-                    <div className="min-w-0 flex-1">
-                      <div className="text-sm font-semibold truncate">{service.tech.name}</div>
-                      <div className="font-mono text-xs text-[#737373]">★ {service.tech.rating}</div>
-                    </div>
-                    <span className="text-emerald-600 text-lg">✔️</span>
-                  </div>
-                </div>
-
-                <div className="pt-6 mt-6 flex items-center justify-between border-t border-[#E7E7E9]">
-                  <div>
-                    <span className="font-mono text-xs text-[#737373] block">Starting from</span>
-                    <span className="font-heading text-2xl font-bold tracking-tight">${service.price}</span>
-                  </div>
-                  <Button asChild size="sm" className="rounded-lg bg-[#F26A36] hover:bg-[#aa3700] text-white font-semibold">
-                    <Link href={`/services/${service.id}`}>View Details & Book</Link>
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <p className="mt-4 text-[10px] font-mono text-[#737373] text-center">Data will be fetched from backend server at /api/services when implemented — currently mock WebP dummy images from src/app/images/</p>
+          <FeaturedServices />
         </div>
       </section>
 
@@ -454,7 +357,7 @@ export default function HomePage() {
               🔄 4-Step Execution Protocol
             </div>
             <h2 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight">Engineered for Absolute Transparency</h2>
-            <p className="text-sm sm:text-base text-[#737373] mt-2">From initial AI error code triage to doorstep sign-off, every stage is tracked, verified, and guaranteed.</p>
+            <p className="text-sm sm:text-base text-[#737373] mt-2">From service discovery to completion, every recorded stage is visible in your dashboard.</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative">
@@ -560,7 +463,7 @@ export default function HomePage() {
             <div className="relative z-10 max-w-3xl space-y-6">
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#F7F7F8] border border-[#E7E7E9] shadow-sm">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="font-mono text-xs font-semibold text-[#F26A36]">Live Dispatch Available Nationwide</span>
+                <span className="font-mono text-xs font-semibold text-[#F26A36]">Request a Repair Online</span>
               </div>
               <h2 className="font-heading text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight">
                 Ready to Restore Your Equipment to

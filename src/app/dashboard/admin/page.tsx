@@ -46,10 +46,10 @@ export default function Page() {
       </div>
 
       <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        <StatCard title="Total Users" value={loading ? "..." : String(stats.users?.total || 0)} subtitle={`${stats.users?.customers || 0} customers, ${stats.users?.technicians || 0} techs`} trend="Live" trendType="positive" />
-        <StatCard title="Services" value={loading ? "..." : String(stats.services)} subtitle="Total" trend="Approved + Pending" trendType="positive" />
-        <StatCard title="Bookings" value={loading ? "..." : String(stats.bookings)} subtitle="All statuses" trend="Live" trendType="positive" />
-        <StatCard title="Payments Volume" value={loading ? "..." : formatCurrency(stats.payments?.totalAmount || 0)} subtitle="Paid total" trend="GSV" trendType="positive" />
+        <StatCard title="Total Users" value={String(stats.users?.total || 0)} subtitle={`${stats.users?.customers || 0} customers, ${stats.users?.technicians || 0} techs`} trend="Live" trendType="positive" loading={loading} />
+        <StatCard title="Services" value={String(stats.services)} subtitle="Total" trend="Approved + Pending" trendType="positive" loading={loading} />
+        <StatCard title="Bookings" value={String(stats.bookings)} subtitle="All statuses" trend="Live" trendType="positive" loading={loading} />
+        <StatCard title="Payments Volume" value={formatCurrency(stats.payments?.totalAmount || 0)} subtitle="Paid total" trend="GSV" trendType="positive" loading={loading} />
       </div>
 
       <CardContainer className="p-6">

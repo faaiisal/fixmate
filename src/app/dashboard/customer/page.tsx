@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { CardContainer } from "@/components/ui/card-container";
 import { TelemetryBadge } from "@/components/ui/telemetry-badge";
 import { StatCard } from "@/components/modules/stat-card";
+import { LoadingState } from "@/components/modules/loading-state";
 import { Button } from "@/components/ui/button";
 import { bookingsApi, paymentsApi, useAuthToken } from "@/lib/api";
 import { useSession } from "@/lib/auth-client";
@@ -62,10 +63,10 @@ export default function CustomerDashboard() {
       </div>
 
       <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        <StatCard title="Active Dispatches" value={loading ? "..." : String(activeDispatches)} subtitle="In-flight" trend="Live" trendType="positive" />
-        <StatCard title="Escrow Protected" value={loading ? "..." : formatCurrency(escrowProtected)} subtitle="Locked" trend="Secured" trendType="positive" />
-        <StatCard title="Completed Repairs" value={loading ? "..." : String(completedRepairs)} subtitle="Lifetime" trend={`+${completedRepairs}`} trendType="positive" />
-        <StatCard title="Total Paid" value={loading ? "..." : formatCurrency(totalPaid)} subtitle="Paid" trend={`${payments.length} payments`} trendType="neutral" />
+        <StatCard title="Active Dispatches" value={String(activeDispatches)} subtitle="In-flight" trend="Live" trendType="positive" loading={loading} />
+        <StatCard title="Escrow Protected" value={formatCurrency(escrowProtected)} subtitle="Locked" trend="Secured" trendType="positive" loading={loading} />
+        <StatCard title="Completed Repairs" value={String(completedRepairs)} subtitle="Lifetime" trend={`+${completedRepairs}`} trendType="positive" loading={loading} />
+        <StatCard title="Total Paid" value={formatCurrency(totalPaid)} subtitle="Paid" trend={`${payments.length} payments`} trendType="neutral" loading={loading} />
       </div>
 
       <div className="grid lg:grid-cols-12 gap-6">
@@ -80,7 +81,13 @@ export default function CustomerDashboard() {
               <TelemetryBadge type="success" label={`ESCROW SECURED ${formatCurrency(escrowProtected)}`} mono />
             </div>
             <div className="h-40 bg-[#F6F3F2] rounded-lg border border-[#E5E0DF] flex items-center justify-center text-xs text-[#8C9098]">
-              {loading ? "Loading live bookings..." : activeDispatches > 0 ? `Live: ${activeDispatches} active dispatch(es) from backend` : "No active dispatches — real data from /api/bookings/my-bookings"}
+              {loading ? (
+                <LoadingState label="Loading live bookings" className="py-0" />
+              ) : activeDispatches > 0 ? (
+                `Live: ${activeDispatches} active dispatch(es) from backend`
+              ) : (
+                "No active dispatches — real data from /api/bookings/my-bookings"
+              )}
             </div>
             <div className="mt-4 grid grid-cols-4 gap-2 text-[10px] font-mono">
               <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-[#10B981]" />BACKEND CONNECTED</div>
@@ -93,7 +100,7 @@ export default function CustomerDashboard() {
           <CardContainer className="p-6">
             <h3 className="font-semibold mb-4">Recent Work Orders & Equipment Logs — Live from Backend</h3>
             <div className="space-y-3">
-              {loading ? <div className="text-sm text-[#8C9098]">Loading...</div> :
+              {loading ? <LoadingState label="Loading recent work orders" /> :
                 bookings.slice(0, 5).map((b: any) => (
                   <div key={b._id} className="flex items-center justify-between p-3 rounded-xl border border-[#E5E0DF] hover:bg-[#F6F3F2]">
                     <div className="flex items-center gap-3">

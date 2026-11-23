@@ -38,10 +38,10 @@ export function Navbar() {
   const dropdownRef = React.useRef<HTMLDivElement>(null);
 
   const user = session?.user as { name?: string; email?: string; role?: string } | undefined;
-  const userName = user?.name || "Hasan Ali";
-  const userEmail = user?.email || "hasan@epyra.com";
+  const userName = user?.name || "Account";
+  const userEmail = user?.email || "";
   const userRole = (user?.role as string) || "customer";
-  const initials = userName.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase();
+  const initials = userName.split(" ").filter(Boolean).map((n: string) => n[0]).join("").slice(0, 2).toUpperCase() || "FM";
 
   React.useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -82,6 +82,12 @@ export function Navbar() {
     return "Customer Dashboard";
   };
 
+  const getBookingsHref = () => {
+    if (userRole === "technician") return "/dashboard/technician/requests";
+    if (userRole === "admin") return "/dashboard/admin/bookings";
+    return "/dashboard/customer/bookings";
+  };
+
   const getVerifiedBadge = () => {
     if (userRole === "technician") return "Verified Technician";
     if (userRole === "admin") return "Verified Admin";
@@ -104,13 +110,15 @@ export function Navbar() {
             <div className="relative" ref={dropdownRef}>
               <button
                 type="button"
+                aria-expanded={dropdownOpen}
+                aria-haspopup="menu"
                 onClick={() => setDropdownOpen(!dropdownOpen)}
                 className="flex items-center gap-2 pl-1 pr-3 py-1 rounded-full bg-white border border-[#E7E7E9] hover:border-orange-300 hover:shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#F26A36]/20"
               >
                 <div className="w-8 h-8 rounded-full bg-[#F26A36] text-white flex items-center justify-center font-bold text-xs shadow-sm">
                   {initials || "HA"}
                 </div>
-                <span className="text-sm font-semibold text-[#171717] hidden sm:inline">{userName.split(" ")[0] || "Hasan"}</span>
+                <span className="text-sm font-semibold text-[#171717] hidden sm:inline">{userName.split(" ")[0] || "Account"}</span>
                 <span className="relative flex h-2 w-2 ml-0.5">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
@@ -137,18 +145,22 @@ export function Navbar() {
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                         {getVerifiedBadge()}
                       </div>
-                      <span className="font-mono text-[11px] text-[#737373]">Tier 1 Escrow</span>
+                      <span className="font-mono text-[11px] text-[#737373] uppercase">{userRole}</span>
                     </div>
-                    <div className="mt-2.5 p-2 rounded-lg bg-[#FFF3ED] border border-orange-200 flex items-center justify-between">
+                    <Link
+                      href={getBookingsHref()}
+                      onClick={() => setDropdownOpen(false)}
+                      className="mt-2.5 p-2 rounded-lg bg-[#FFF3ED] border border-orange-200 flex items-center justify-between hover:bg-[#FFE8DC] transition-colors"
+                    >
                       <div className="flex items-center gap-2 min-w-0">
-                        <span className="text-[#F26A36] text-[17px]">🧾</span>
+                        <span className="text-[#F26A36] text-[17px]" aria-hidden="true">🧾</span>
                         <div className="min-w-0">
-                          <p className="font-mono text-[11px] font-semibold text-[#F26A36] truncate leading-tight">Job #FXM-98214</p>
-                          <p className="text-[10px] text-[#737373] truncate leading-tight">Fridge Diagnostics (Escrow)</p>
+                          <p className="font-mono text-[11px] font-semibold text-[#F26A36] truncate leading-tight">Open your dashboard</p>
+                          <p className="text-[10px] text-[#737373] truncate leading-tight">Real booking status, no mock records</p>
                         </div>
                       </div>
-                      <span className="font-mono text-[10px] font-bold text-emerald-700 bg-white/90 px-1.5 py-0.5 rounded border border-green-200">Active</span>
-                    </div>
+                      <span className="font-mono text-[10px] font-bold text-emerald-700 bg-white/90 px-1.5 py-0.5 rounded border border-green-200">View</span>
+                    </Link>
                   </div>
 
                   <div className="space-y-0.5">
@@ -160,18 +172,20 @@ export function Navbar() {
                       <span>Book New Repair</span>
                       <span className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-[#F26A36] text-white">New</span>
                     </Link>
-                    <Link href="/dashboard/customer/bookings" onClick={() => setDropdownOpen(false)} className="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold hover:bg-[#F7F7F8] group">
-                      <span>Active Bookings & GPS</span>
-                      <span className="font-mono text-[10px] px-1.5 py-0.5 rounded-full bg-[#ECFDF5] text-[#047857]">1 Live</span>
+                    <Link href={getBookingsHref()} onClick={() => setDropdownOpen(false)} className="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold hover:bg-[#F7F7F8] group">
+                      <span>Bookings &amp; Tracking</span>
+                      <span>›</span>
                     </Link>
                     <Link href="/dashboard/profile" onClick={() => setDropdownOpen(false)} className="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold hover:bg-[#F7F7F8] group">
-                      <span>Saved Addresses & Gear</span>
+                      <span>Profile &amp; Contact</span>
                       <span>›</span>
                     </Link>
-                    <Link href="/dashboard/customer/payments" onClick={() => setDropdownOpen(false)} className="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold hover:bg-[#F7F7F8] group">
-                      <span>Escrow & Invoices</span>
-                      <span>›</span>
-                    </Link>
+                    {userRole === "customer" && (
+                      <Link href="/dashboard/customer/payments" onClick={() => setDropdownOpen(false)} className="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold hover:bg-[#F7F7F8] group">
+                        <span>Payments &amp; Invoices</span>
+                        <span>›</span>
+                      </Link>
+                    )}
                     <Link href="/dashboard/profile" onClick={() => setDropdownOpen(false)} className="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold hover:bg-[#F7F7F8] group">
                       <span>Account & Telemetry Settings</span>
                       <span>›</span>

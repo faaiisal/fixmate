@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { CardContainer } from "@/components/ui/card-container";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { LoadingState } from "@/components/modules/loading-state";
 import { servicesApi, useAuthToken } from "@/lib/api";
 import { useSession } from "@/lib/auth-client";
 import { toast } from "sonner";
@@ -66,7 +67,7 @@ export default function Page() {
       </div>
 
       {loading ? (
-        <CardContainer className="p-8 text-center text-sm text-[#8C9098]">Loading services...</CardContainer>
+        <CardContainer className="p-8"><LoadingState label="Loading services" /></CardContainer>
       ) : services.length === 0 ? (
         <CardContainer className="p-8 text-center text-[#8C9098]">No {filter} services</CardContainer>
       ) : (

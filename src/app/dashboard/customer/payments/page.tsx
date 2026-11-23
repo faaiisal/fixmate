@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { CardContainer } from "@/components/ui/card-container";
+import { LoadingState } from "@/components/modules/loading-state";
 import { paymentsApi, useAuthToken } from "@/lib/api";
 import { useSession } from "@/lib/auth-client";
 import { toast } from "sonner";
@@ -38,7 +39,7 @@ export default function Page() {
         </p>
       </div>
 
-      {loading ? <CardContainer className="p-8 text-center text-sm text-[#8C9098]">Loading payment history...</CardContainer> :
+      {loading ? <CardContainer className="p-8"><LoadingState label="Loading payment history" /></CardContainer> :
         payments.length === 0 ? <CardContainer className="p-8 text-center">
           <p className="text-sm text-[#8C9098]">No payments yet. Complete bookings and pay via Pay Now to see history.</p>
           <div className="mt-4 text-xs text-[#55595F] space-y-1 text-left max-w-xl mx-auto bg-[#F9F7F6] border border-[#E7E7E9] rounded p-3">

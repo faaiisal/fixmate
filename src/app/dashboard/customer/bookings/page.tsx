@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { CardContainer } from "@/components/ui/card-container";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/modules/status-badge";
+import { LoadingState } from "@/components/modules/loading-state";
 import { bookingsApi, paymentsApi, useAuthToken } from "@/lib/api";
 import { useSession } from "@/lib/auth-client";
 import { toast } from "sonner";
@@ -86,6 +88,8 @@ export default function Page() {
           {["All", "requested", "accepted", "in-progress", "completed", "cancelled", "rejected"].map((s) => (
             <button
               key={s}
+              type="button"
+              aria-pressed={filterStatus === s}
               onClick={() => setFilterStatus(s)}
               className={`px-3 py-1 rounded-full text-xs border ${filterStatus === s ? "bg-[#FFF1EC] border-[#FFD6C2] text-[#F26A36]" : "bg-white border-[#E5E0DF]"}`}
             >
@@ -96,7 +100,9 @@ export default function Page() {
       </div>
 
       {loading ? (
-        <CardContainer className="p-8 text-center text-sm text-[#8C9098]">Loading bookings from backend...</CardContainer>
+        <CardContainer className="p-8">
+          <LoadingState label="Loading bookings" />
+        </CardContainer>
       ) : bookings.length === 0 ? (
         <CardContainer className="p-8 text-center">
           <p className="text-[#55595F]">No bookings found. Data is live from backend /api/bookings/my-bookings</p>
@@ -105,84 +111,73 @@ export default function Page() {
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
           {bookings.map((b: any) => (
-            <CardContainer
-              key={b._id}
-              className="p-5 hover:shadow-md transition-shadow cursor-pointer group"
-              onClick={() => {
-                // Navigate to detail for step-by-step tracking
-                window.location.href = `/dashboard/customer/bookings/${b._id}`;
-              }}
-            >
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-mono text-[#8C9098]">ID: {b._id.slice(-6).toUpperCase()}</span>
-                <StatusBadge status={b.status} />
-              </div>
-              {/* Service Image + Title from snapshots (Phase 3) */}
-              <div className="flex gap-3 mb-3">
-                <div className="w-16 h-16 bg-[#F6F3F2] rounded border overflow-hidden flex-shrink-0 flex items-center justify-center">
-                  {b.serviceImage ? (
-                    <img src={b.serviceImage} alt={b.serviceTitle || "Service"} className="w-full h-full object-cover" />
-                  ) : (
-                    <span className="text-[10px] text-[#8C9098]">No image</span>
-                  )}
+            <CardContainer key={b._id} className="p-5 hover:shadow-md transition-shadow group relative">
+              {/* Stretched link keeps the whole card keyboard accessible without
+                  wrapping the Cancel / Pay Now buttons in an anchor element. */}
+              <Link
+                href={`/dashboard/customer/bookings/${b._id}`}
+                className="absolute inset-0 z-0 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F26A36] focus-visible:ring-offset-2"
+                aria-label={`View details for booking ${b._id.slice(-6).toUpperCase()} — ${b.serviceTitle || "repair booking"}`}
+              />
+              <div className="relative z-10 pointer-events-none">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-xs font-mono text-[#8C9098]">ID: {b._id.slice(-6).toUpperCase()}</span>
+                  <StatusBadge status={b.status} />
                 </div>
-                <div className="flex-1 min-w-0">
-                  <h4 className="font-semibold text-[#14121B] line-clamp-1 group-hover:text-[#F26A36] transition-colors">{b.serviceTitle || b.problemDescription?.slice(0, 60) || "Repair Booking"}</h4>
-                  <p className="text-[11px] font-mono text-[#8C9098] mt-1">{b.category || "Category"} • {b.serviceId?.toString().slice(-6) || "Service"}</p>
+                {/* Service Image + Title from snapshots (Phase 3) */}
+                <div className="flex gap-3 mb-3">
+                  <div className="w-16 h-16 bg-[#F6F3F2] rounded border overflow-hidden flex-shrink-0 flex items-center justify-center">
+                    {b.serviceImage ? (
+                      <img src={b.serviceImage} alt={b.serviceTitle || "Service"} className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="text-[10px] text-[#8C9098]">No image</span>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-semibold text-[#14121B] line-clamp-1 group-hover:text-[#F26A36] transition-colors">{b.serviceTitle || b.problemDescription?.slice(0, 60) || "Repair Booking"}</h4>
+                    <p className="text-[11px] font-mono text-[#8C9098] mt-1">{b.category || "Category"} • {b.serviceId?.toString().slice(-6) || "Service"}</p>
+                  </div>
                 </div>
-              </div>
-              <div className="mt-2 text-sm text-[#55595F] space-y-1">
-                <div>Customer: {b.customerName}</div>
-                <div>Technician: {b.technicianName || `Tech ${b.technicianId?.toString().slice(-6) || "Assigned"}`}</div>
-                <div className="font-mono text-xs text-[#8C9098]">{new Date(b.preferredDate).toLocaleDateString()} • {new Date(b.createdAt).toLocaleDateString()}</div>
-                <div className="text-xs">Base: {formatCurrency(b.basePrice)} {b.finalAmount && b.finalAmount !== b.basePrice ? `• Final: ${formatCurrency(b.finalAmount)}` : ""}</div>
-                <div className="text-xs font-mono">Payment: {b.paymentStatus} {b.paymentStatus === "pending" ? "(unpaid)" : ""}</div>
-                {/* Step-by-step tracking visual */}
-                <div className="flex items-center gap-1 mt-2 text-[10px] font-mono">
-                  {["requested", "accepted", "in-progress", "completed", "paid"].map((step, idx) => {
-                    const steps = ["requested", "accepted", "in-progress", "completed"];
-                    const isCompleted = steps.indexOf(b.status) >= idx || (step === "paid" && b.paymentStatus === "paid");
-                    const isCurrent = b.status === step || (step === "paid" && b.paymentStatus === "paid");
-                    return (
-                      <span key={step} className="flex items-center gap-1">
-                        <span className={`w-4 h-4 rounded-full flex items-center justify-center border text-[8px] ${isCompleted ? "bg-[#ECFDF5] border-[#A7F3D0] text-[#059669]" : "bg-[#F6F3F2] border-[#E5E0DF] text-[#8C9098]"}`}>
-                          {isCompleted ? "✓" : idx + 1}
+                <div className="mt-2 text-sm text-[#55595F] space-y-1">
+                  <div>Customer: {b.customerName}</div>
+                  <div>Technician: {b.technicianName || `Tech ${b.technicianId?.toString().slice(-6) || "Assigned"}`}</div>
+                  <div className="font-mono text-xs text-[#8C9098]">{new Date(b.preferredDate).toLocaleDateString()} • {new Date(b.createdAt).toLocaleDateString()}</div>
+                  <div className="text-xs">Base: {formatCurrency(b.basePrice)} {b.finalAmount && b.finalAmount !== b.basePrice ? `• Final: ${formatCurrency(b.finalAmount)}` : ""}</div>
+                  <div className="text-xs font-mono">Payment: {b.paymentStatus} {b.paymentStatus === "pending" ? "(unpaid)" : ""}</div>
+                  {/* Step-by-step tracking visual */}
+                  <div className="flex items-center gap-1 mt-2 text-[10px] font-mono">
+                    {["requested", "accepted", "in-progress", "completed", "paid"].map((step, idx) => {
+                      const steps = ["requested", "accepted", "in-progress", "completed"];
+                      const isCompleted = steps.indexOf(b.status) >= idx || (step === "paid" && b.paymentStatus === "paid");
+                      return (
+                        <span key={step} className="flex items-center gap-1">
+                          <span className={`w-4 h-4 rounded-full flex items-center justify-center border text-[8px] ${isCompleted ? "bg-[#ECFDF5] border-[#A7F3D0] text-[#059669]" : "bg-[#F6F3F2] border-[#E5E0DF] text-[#8C9098]"}`}>
+                            {isCompleted ? "✓" : idx + 1}
+                          </span>
+                          {idx < 4 && <span className={`w-3 h-0.5 ${isCompleted ? "bg-[#A7F3D0]" : "bg-[#E5E0DF]"}`} />}
                         </span>
-                        {idx < 4 && <span className={`w-3 h-0.5 ${isCompleted ? "bg-[#A7F3D0]" : "bg-[#E5E0DF]"}`} />}
-                      </span>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-              <div className="mt-4 flex flex-wrap gap-2 items-center">
-                <span className="font-bold">{formatCurrency(b.finalAmount || b.basePrice)}</span>
-                {/* Only Customer should see cancellation and payment actions */}
-                {role === "customer" && b.status === "requested" && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="text-xs rounded-full"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleCancel(b._id);
-                    }}
-                  >
-                    Cancel
-                  </Button>
-                )}
-                {role === "customer" && b.status === "completed" && b.paymentStatus === "pending" && (
-                  <Button
-                    size="sm"
-                    className="bg-[#F26A36] text-xs rounded-full"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handlePay(b._id);
-                    }}
-                  >
-                    Pay Now →
-                  </Button>
-                )}
-                <span className="text-[10px] font-mono text-[#8C9098] ml-auto">Click for detailed tracking →</span>
+                <div className="mt-4 flex flex-wrap gap-2 items-center">
+                  <span className="font-bold">{formatCurrency(b.finalAmount || b.basePrice)}</span>
+                  {/* Only Customer should see cancellation and payment actions.
+                      pointer-events-auto keeps them usable above the stretched link. */}
+                  <div className="flex flex-wrap gap-2 pointer-events-auto">
+                    {role === "customer" && b.status === "requested" && (
+                      <Button variant="outline" size="sm" className="text-xs rounded-full" onClick={() => handleCancel(b._id)}>
+                        Cancel
+                      </Button>
+                    )}
+                    {role === "customer" && b.status === "completed" && b.paymentStatus === "pending" && (
+                      <Button size="sm" className="bg-[#F26A36] text-xs rounded-full" onClick={() => handlePay(b._id)}>
+                        Pay Now →
+                      </Button>
+                    )}
+                  </div>
+                  <span className="text-[10px] font-mono text-[#8C9098] ml-auto">Open details →</span>
+                </div>
               </div>
             </CardContainer>
           ))}
