@@ -5,14 +5,16 @@ import { CardContainer } from "@/components/ui/card-container";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { StatusBadge } from "@/components/modules/status-badge";
-import { bookingsApi } from "@/lib/api";
+import { bookingsApi, useAuthToken } from "@/lib/api";
 import { useSession } from "@/lib/auth-client";
 import { toast } from "sonner";
 import { formatCurrency } from "@/lib/utils";
 
 export default function Page() {
   const { data: session } = useSession();
-  const token = (session?.user as any)?.id || null;
+  const token = useAuthToken(session);
+  const sessionUser = session as any;
+  const role = sessionUser?.user?.role || sessionUser?.role || "technician";
   const [bookings, setBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("All");
@@ -20,6 +22,10 @@ export default function Page() {
 
   const fetchAssigned = async () => {
     if (!token) return;
+    if (role !== "technician") {
+      toast.error("Only technicians can view assigned bookings");
+      return;
+    }
     try {
       setLoading(true);
       const params: Record<string, any> = {};
@@ -37,6 +43,10 @@ export default function Page() {
 
   const handleAction = async (id: string, action: "accept" | "reject" | "start") => {
     if (!token) return;
+    if (role !== "technician") {
+      toast.error("Only technicians can update job status");
+      return;
+    }
     try {
       if (action === "accept") await bookingsApi.accept(token, id);
       if (action === "reject") await bookingsApi.reject(token, id);
@@ -50,6 +60,10 @@ export default function Page() {
 
   const handleComplete = async (id: string) => {
     if (!token) return;
+    if (role !== "technician") {
+      toast.error("Only technicians can complete jobs");
+      return;
+    }
     const amount = finalAmounts[id];
     if (!amount || amount <= 0) {
       toast.error("Final amount required and must be positive");
@@ -99,16 +113,17 @@ export default function Page() {
                 <div>Base: {formatCurrency(b.basePrice)} {b.finalAmount ? `• Final: ${formatCurrency(b.finalAmount)}` : ""} • Payment: {b.paymentStatus}</div>
               </div>
               <div className="mt-4 flex flex-wrap gap-2">
-                {b.status === "requested" && (
+                {/* Only Technician should see Accept, Reject, Start, Complete */}
+                {role === "technician" && b.status === "requested" && (
                   <>
                     <Button size="sm" className="bg-[#10B981] text-xs" onClick={() => handleAction(b._id, "accept")}>Accept</Button>
                     <Button variant="outline" size="sm" className="text-xs" onClick={() => handleAction(b._id, "reject")}>Reject</Button>
                   </>
                 )}
-                {b.status === "accepted" && (
+                {role === "technician" && b.status === "accepted" && (
                   <Button size="sm" className="bg-[#0EA5E9] text-xs" onClick={() => handleAction(b._id, "start")}>Start Repair → In-Progress</Button>
                 )}
-                {b.status === "in-progress" && (
+                {role === "technician" && b.status === "in-progress" && (
                   <div className="flex items-center gap-2">
                     <Input type="number" placeholder="Final amount" className="w-28 h-8 text-xs" value={finalAmounts[b._id] || ""} onChange={(e) => setFinalAmounts({ ...finalAmounts, [b._id]: Number(e.target.value) })} />
                     <Button size="sm" className="bg-[#F26A36] text-xs" onClick={() => handleComplete(b._id)}>Complete</Button>

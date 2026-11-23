@@ -353,24 +353,38 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {categories.map((cat) => (
-              <Link
-                key={cat.label}
-                href="/services"
-                className="p-5 rounded-xl bg-white border border-[#E7E7E9] hover:border-orange-300 hover:shadow-md transition-all shadow-sm group flex flex-col justify-between h-44"
-              >
-                <div className="flex items-start justify-between">
-                  <div className="w-12 h-12 rounded-lg bg-orange-50 group-hover:bg-[#F26A36] group-hover:text-white flex items-center justify-center text-[#F26A36] transition-colors text-2xl">
-                    {cat.icon}
+            {categories.map((cat) => {
+              // Map home labels to backend canonical categories for server-side filtering
+              const categoryMap: Record<string, string> = {
+                "Smartphone": "Smartphone",
+                "Laptop & PC": "Laptop & PC",
+                "Air Conditioners": "Air Conditioner",
+                "Refrigerator": "Refrigerator",
+                "Television": "Television",
+                "Washing Machine": "Washing Machine",
+                "Electrical": "Electrical Appliances",
+                "Kitchen & Water": "Electrical Appliances",
+              };
+              const backendCategory = categoryMap[cat.label] || cat.label;
+              return (
+                <Link
+                  key={cat.label}
+                  href={`/services?category=${encodeURIComponent(backendCategory)}`}
+                  className="p-5 rounded-xl bg-white border border-[#E7E7E9] hover:border-orange-300 hover:shadow-md transition-all shadow-sm group flex flex-col justify-between h-44"
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="w-12 h-12 rounded-lg bg-orange-50 group-hover:bg-[#F26A36] group-hover:text-white flex items-center justify-center text-[#F26A36] transition-colors text-2xl">
+                      {cat.icon}
+                    </div>
+                    <span className="font-mono text-xs text-[#737373] group-hover:text-[#F26A36]">{cat.count} Techs</span>
                   </div>
-                  <span className="font-mono text-xs text-[#737373] group-hover:text-[#F26A36]">{cat.count} Techs</span>
-                </div>
-                <div>
-                  <h3 className="font-heading text-base font-semibold group-hover:text-[#F26A36] transition-colors">{cat.label}</h3>
-                  <p className="text-xs text-[#737373] mt-0.5 line-clamp-1">{cat.desc}</p>
-                </div>
-              </Link>
-            ))}
+                  <div>
+                    <h3 className="font-heading text-base font-semibold group-hover:text-[#F26A36] transition-colors">{cat.label}</h3>
+                    <p className="text-xs text-[#737373] mt-0.5 line-clamp-1">{cat.desc}</p>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         </div>
       </section>

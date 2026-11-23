@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { CardContainer } from "@/components/ui/card-container";
 import { Button } from "@/components/ui/button";
-import { paymentsApi } from "@/lib/api";
+import { paymentsApi, useAuthToken } from "@/lib/api";
 import { useSession } from "@/lib/auth-client";
 import { toast } from "sonner";
 
@@ -13,7 +13,7 @@ export default function Page() {
   const sessionId = searchParams.get("session_id");
   const bookingId = searchParams.get("booking_id");
   const { data: session } = useSession();
-  const token = (session?.user as any)?.id || null;
+  const token = useAuthToken(session);
   const router = useRouter();
   const [status, setStatus] = useState<"verifying" | "success" | "failed" | "no_session">("verifying");
   const [details, setDetails] = useState<any>(null);

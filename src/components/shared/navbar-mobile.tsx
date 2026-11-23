@@ -55,6 +55,12 @@ export function NavbarMobile({
     return "/dashboard/customer";
   };
 
+  const getDashboardLabel = () => {
+    if (userRole === "technician") return "Technician Dashboard";
+    if (userRole === "admin") return "Admin Dashboard";
+    return "Customer Dashboard";
+  };
+
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger
@@ -114,7 +120,7 @@ export function NavbarMobile({
                 <Button asChild variant="outline" className="rounded-full bg-white border-[#E5E0DF] w-full">
                   <Link href={getDashboardHref()} onClick={() => setOpen(false)}>
                     <LayoutDashboard className="w-4 h-4 mr-1" />
-                    Dashboard
+                    {getDashboardLabel()}
                   </Link>
                 </Button>
                 <Button variant="outline" className="rounded-full bg-white border-[#E5E0DF] hover:bg-[#FEF2F2] hover:text-[#ba1a1a] hover:border-[#ffdad6] w-full" onClick={handleSignOut}>

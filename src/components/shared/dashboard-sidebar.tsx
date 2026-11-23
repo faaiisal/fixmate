@@ -7,14 +7,14 @@ import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
   ClipboardList,
-  Stethoscope,
   Package,
   CreditCard,
-  BarChart3,
   Settings,
   LogOut,
   Users,
   Shield,
+  Plus,
+  Wrench,
 } from "lucide-react";
 import { authClient, useSession } from "@/lib/auth-client";
 import { toast } from "sonner";
@@ -23,6 +23,8 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 type Role = "customer" | "technician" | "admin";
 
+// Clean architecture: only real existing pages, no duplicates, no fake pages
+// Backend routes: /dashboard/* existing pages only
 const NAV_CONFIG: Record<Role, { label: string; href: string; icon: React.ElementType }[]> = {
   customer: [
     { label: "Overview", href: "/dashboard/customer", icon: LayoutDashboard },
@@ -33,23 +35,29 @@ const NAV_CONFIG: Record<Role, { label: string; href: string; icon: React.Elemen
   ],
   technician: [
     { label: "Overview", href: "/dashboard/technician", icon: LayoutDashboard },
-    { label: "Diagnostic Dispatch", href: "/dashboard/technician/requests", icon: Stethoscope },
-    { label: "Services Catalog", href: "/dashboard/technician/my-services", icon: Package },
-    { label: "Financial Escrow", href: "/dashboard/technician", icon: CreditCard },
-    { label: "Analytics & Telemetry", href: "/dashboard/technician", icon: BarChart3 },
+    { label: "My Services", href: "/dashboard/technician/my-services", icon: Package },
+    { label: "Add Service", href: "/dashboard/technician/add-service", icon: Plus },
+    { label: "Requests", href: "/dashboard/technician/requests", icon: Wrench },
     { label: "Settings", href: "/dashboard/profile", icon: Settings },
   ],
   admin: [
     { label: "Overview", href: "/dashboard/admin", icon: LayoutDashboard },
     { label: "Bookings & Tracking", href: "/dashboard/admin/bookings", icon: ClipboardList },
-    { label: "Diagnostic Dispatch", href: "/dashboard/admin/bookings", icon: Stethoscope },
     { label: "Services Catalog", href: "/dashboard/admin/services", icon: Package },
     { label: "Financial Escrow", href: "/dashboard/admin/transactions", icon: CreditCard },
-    { label: "Analytics & Telemetry", href: "/dashboard/admin", icon: BarChart3 },
     { label: "Users", href: "/dashboard/admin/users", icon: Users },
     { label: "Settings", href: "/dashboard/profile", icon: Settings },
   ],
 };
+
+function isActivePath(pathname: string, href: string): boolean {
+  // Overview pages should only be active on exact match, not on subpaths
+  // e.g., /dashboard/admin should NOT be active when on /dashboard/admin/bookings
+  if (href === "/dashboard/customer" || href === "/dashboard/technician" || href === "/dashboard/admin") {
+    return pathname === href;
+  }
+  return pathname === href || pathname.startsWith(href + "/");
+}
 
 export function DashboardSidebar({ role: propRole = "customer" as Role }) {
   const pathname = usePathname();
@@ -93,7 +101,7 @@ export function DashboardSidebar({ role: propRole = "customer" as Role }) {
           <span className="px-3 text-[11px] font-mono font-semibold text-[#8C9098] uppercase tracking-wider">Workspace</span>
           <nav className="mt-2 space-y-1">
             {items.map((item) => {
-              const active = pathname === item.href || pathname.startsWith(item.href + "/");
+              const active = isActivePath(pathname, item.href);
               return (
                 <Link
                   key={item.href + item.label}

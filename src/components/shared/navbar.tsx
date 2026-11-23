@@ -76,6 +76,18 @@ export function Navbar() {
     return "/dashboard/customer";
   };
 
+  const getDashboardLabel = () => {
+    if (userRole === "technician") return "Technician Dashboard";
+    if (userRole === "admin") return "Admin Dashboard";
+    return "Customer Dashboard";
+  };
+
+  const getVerifiedBadge = () => {
+    if (userRole === "technician") return "Verified Technician";
+    if (userRole === "admin") return "Verified Admin";
+    return "Verified Client";
+  };
+
   return (
     <header className="sticky top-0 z-40 w-full bg-white/90 backdrop-blur-xl border-b border-[#E7E7E9] shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-[80px] flex items-center justify-between gap-4">
@@ -123,7 +135,7 @@ export function Navbar() {
                     <div className="mt-3 pt-2.5 border-t border-[#E7E7E9]/80 flex items-center justify-between text-xs">
                       <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#ECFDF5] text-[#047857] font-mono text-[11px] font-semibold">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                        Verified Client
+                        {getVerifiedBadge()}
                       </div>
                       <span className="font-mono text-[11px] text-[#737373]">Tier 1 Escrow</span>
                     </div>
@@ -141,7 +153,7 @@ export function Navbar() {
 
                   <div className="space-y-0.5">
                     <Link href={getDashboardHref()} onClick={() => setDropdownOpen(false)} className="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-[#171717] hover:bg-[#F7F7F8] hover:text-[#F26A36] transition-colors group">
-                      <span>Customer Dashboard</span>
+                      <span>{getDashboardLabel()}</span>
                       <span>›</span>
                     </Link>
                     <Link href="/services" onClick={() => setDropdownOpen(false)} className="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold hover:bg-orange-50 hover:text-[#F26A36] group">

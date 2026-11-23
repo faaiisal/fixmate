@@ -5,7 +5,7 @@ import { CardContainer } from "@/components/ui/card-container";
 import { TelemetryBadge } from "@/components/ui/telemetry-badge";
 import { StatCard } from "@/components/modules/stat-card";
 import { Button } from "@/components/ui/button";
-import { bookingsApi, paymentsApi } from "@/lib/api";
+import { bookingsApi, paymentsApi, useAuthToken } from "@/lib/api";
 import { useSession } from "@/lib/auth-client";
 import { formatCurrency } from "@/lib/utils";
 import Link from "next/link";
@@ -13,7 +13,7 @@ import Link from "next/link";
 export default function CustomerDashboard() {
   const { data: session } = useSession();
   const sessionUser = session?.user as any;
-  const token = sessionUser?.id || null;
+  const token = useAuthToken(session);
   const [bookings, setBookings] = useState<any[]>([]);
   const [payments, setPayments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -24,8 +24,8 @@ export default function CustomerDashboard() {
       try {
         setLoading(true);
         const [bookingsRes, paymentsRes] = await Promise.all([
-          bookingsApi.myBookings(token, { limit: 20 }).catch(() => ({ data: [] })),
-          paymentsApi.myHistory(token, { limit: 20 }).catch(() => ({ data: [] })),
+          bookingsApi.myBookings(token!, { limit: 20 }).catch(() => ({ data: [] })),
+          paymentsApi.myHistory(token!, { limit: 20 }).catch(() => ({ data: [] })),
         ]);
         setBookings((bookingsRes as any).data || []);
         setPayments((paymentsRes as any).data || []);

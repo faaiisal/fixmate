@@ -63,18 +63,30 @@ export function ServiceCard({ id, title, description, price, category, image, te
   return (
     <Link href={`/services/${id}`} className="h-full">
       <CardContainer hoverable className="overflow-hidden p-0 h-full flex flex-col group">
-        {/* Image Section - 48 height, now with real WebP */}
+        {/* Image Section - 48 height, now with real ImgBB + Unsplash support */}
         <div className="h-48 bg-[#F6F3F2] relative overflow-hidden">
           {isRemoteImage ? (
-            // Remote backend image (ImgBB) - use img tag with unoptimized to avoid next.config remotePatterns
+            // Remote backend image (ImgBB or Unsplash) - img tag with fallback to local on error
             <img
               src={image}
               alt={title}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               loading="lazy"
+              onError={(e) => {
+                // Fallback to local category image if remote fails - preserve existing Unsplash working
+                const target = e.target as HTMLImageElement;
+                target.style.display = "none";
+                // Show local fallback via parent
+                const fallback = target.nextElementSibling as HTMLElement | null;
+                if (fallback) fallback.style.display = "block";
+              }}
             />
-          ) : (
-            // Local category WebP from src/app/images/
+          ) : null}
+          {/* Local category WebP fallback - shown when no remote or remote fails */}
+          <div
+            className="absolute inset-0"
+            style={{ display: isRemoteImage ? "none" : "block" }}
+          >
             <Image
               src={localFallbackImage}
               alt={`${category} repair - ${title}`}
@@ -82,6 +94,18 @@ export function ServiceCard({ id, title, description, price, category, image, te
               className="object-cover group-hover:scale-105 transition-transform duration-500"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
+          </div>
+          {/* If remote image present, also render local fallback hidden behind for error case */}
+          {isRemoteImage && (
+            <div className="absolute inset-0 hidden">
+              <Image
+                src={localFallbackImage}
+                alt={`${category} fallback`}
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              />
+            </div>
           )}
 
           {/* Category + status badges over image */}

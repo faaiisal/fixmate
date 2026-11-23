@@ -80,18 +80,77 @@ export const auth = betterAuth({
 
   // User: extend with FixMate role field
   // BetterAuth will store role in user collection
+  // SECURITY FIX Phase 1: Keep input:true to allow customer|technician but enforce server-side via databaseHooks below
+  // Admin role never allowed from public sign-up — sanitized in databaseHooks
   user: {
     additionalFields: {
       role: {
         type: "string",
         required: false,
         defaultValue: "customer",
-        input: true, // Allow passing role during sign-up
+        input: true, // Allowed for customer|technician, sanitized server-side to block admin
       },
       phone: {
         type: "string",
         required: false,
         input: true,
+      },
+      area: {
+        type: "string",
+        required: false,
+        input: true,
+      },
+      bio: {
+        type: "string",
+        required: false,
+        input: true,
+      },
+    },
+  },
+
+  // SECURITY: Database hooks to enforce role assignment — prevents public admin registration
+  // Even if client sends role=admin via crafted request, it will be forced to customer
+  // Existing admin accounts remain intact (hook only on create, not update)
+  databaseHooks: {
+    user: {
+      create: {
+        before: async (user) => {
+          const PERMITTED_PUBLIC_ROLES = ["customer", "technician"];
+          const rawRole = (user as any).role;
+          const normalizedRole =
+            typeof rawRole === "string" ? rawRole.trim().toLowerCase() : "";
+
+          // Block admin role from public sign-up — force to customer
+          if (normalizedRole === "admin") {
+            console.warn(
+              `[SECURITY] Blocked public admin registration attempt for ${(user as any).email} — forcing to customer`
+            );
+            return {
+              data: {
+                ...user,
+                role: "customer",
+              },
+            };
+          }
+
+          // Allow only customer and technician for public sign-up
+          if (PERMITTED_PUBLIC_ROLES.includes(normalizedRole)) {
+            return {
+              data: {
+                ...user,
+                role: normalizedRole,
+              },
+            };
+          }
+
+          // Invalid or missing role — default to customer
+          return {
+            data: {
+              ...user,
+              role: "customer",
+            },
+          };
+        },
       },
     },
   },

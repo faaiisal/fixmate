@@ -4,14 +4,16 @@ import { useEffect, useState } from "react";
 import { CardContainer } from "@/components/ui/card-container";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/modules/status-badge";
-import { bookingsApi, paymentsApi } from "@/lib/api";
+import { bookingsApi, paymentsApi, useAuthToken } from "@/lib/api";
 import { useSession } from "@/lib/auth-client";
 import { toast } from "sonner";
 import { formatCurrency } from "@/lib/utils";
 
 export default function Page() {
   const { data: session } = useSession();
-  const token = (session?.user as any)?.id || null;
+  const token = useAuthToken(session);
+  const sessionUser = session as any;
+  const role = sessionUser?.user?.role || sessionUser?.role || "customer";
   const [bookings, setBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState<string>("All");
@@ -37,6 +39,10 @@ export default function Page() {
 
   const handleCancel = async (id: string) => {
     if (!token) return;
+    if (role !== "customer") {
+      toast.error("Only customers can cancel bookings");
+      return;
+    }
     try {
       await bookingsApi.cancel(token, id);
       toast.success("Booking cancelled");
@@ -48,6 +54,10 @@ export default function Page() {
 
   const handlePay = async (bookingId: string) => {
     if (!token) return;
+    if (role !== "customer") {
+      toast.error("Only customers can pay for bookings");
+      return;
+    }
     try {
       const res = await paymentsApi.createCheckout(token, bookingId);
       const data = res.data as any;
@@ -107,10 +117,11 @@ export default function Page() {
               </div>
               <div className="mt-4 flex flex-wrap gap-2">
                 <span className="font-bold">{formatCurrency(b.finalAmount || b.basePrice)}</span>
-                {b.status === "requested" && (
+                {/* Only Customer should see cancellation and payment actions */}
+                {role === "customer" && b.status === "requested" && (
                   <Button variant="outline" size="sm" className="text-xs rounded-full" onClick={() => handleCancel(b._id)}>Cancel</Button>
                 )}
-                {b.status === "completed" && b.paymentStatus === "pending" && (
+                {role === "customer" && b.status === "completed" && b.paymentStatus === "pending" && (
                   <Button size="sm" className="bg-[#F26A36] text-xs rounded-full" onClick={() => handlePay(b._id)}>Pay Now →</Button>
                 )}
               </div>

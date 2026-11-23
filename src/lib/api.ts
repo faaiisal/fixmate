@@ -58,9 +58,9 @@ export async function apiFetch<T>(
   const fetchOptions: RequestInit = {
     method,
     headers: finalHeaders,
-    // For public GET without token, omit credentials to avoid extra preflight and extension issues
-    // For authenticated requests, include credentials to allow cookie parsing (BetterAuth session)
-    credentials: token ? "include" : "omit",
+    // Phase 1 Fix: Always include credentials to allow BetterAuth session cookie authentication
+    // Previously conditional omit broke cookie auth when token was null
+    credentials: "include",
     cache: cache || "no-store",
     mode: "cors",
   };
@@ -73,15 +73,18 @@ export async function apiFetch<T>(
   try {
     response = await fetch(url, fetchOptions);
   } catch (err: any) {
-    // Handle TypeError: Failed to fetch — common causes: backend down, CORS, or Chrome extension intercepting fetch (e.g. frame_ant, ad-blockers)
+    // Handle TypeError: Failed to fetch — backend down, CORS, etc.
     const isNetworkError =
       err instanceof TypeError &&
       (err.message.includes("Failed to fetch") || err.message.includes("NetworkError"));
 
     if (isNetworkError) {
-      console.error(`[apiFetch] Network error fetching ${url}:`, err);
+      // Dev-only detailed logging, safe message for user
+      if (process.env.NODE_ENV === "development") {
+        console.error(`[apiFetch] Network error fetching ${url}:`, err);
+      }
       throw {
-        message: `Backend not reachable at ${url}. Please ensure backend server is running (cd fixmate-server && npm run build && node dist/server.js or npm run dev on port 8000). Also check CORS and disable Chrome extensions that block fetch (e.g. ad-blockers like frame_ant at chrome-extension://hoklmmgfnpapgjgcpechhaamimifchmp). Original: ${err.message}`,
+        message: `Backend not reachable. Please ensure the server is running and try again.`,
         status: 0,
         error: err,
       } as ApiError;
@@ -89,7 +92,7 @@ export async function apiFetch<T>(
 
     // Unknown fetch error
     throw {
-      message: `Fetch error for ${url}: ${err.message || "Unknown network error"}`,
+      message: `Network error. Please try again.`,
       status: 0,
       error: err,
     } as ApiError;
@@ -142,8 +145,19 @@ export async function apiFetch<T>(
 }
 
 // Helper to get token from session hook
+// Phase 7 Fix: Return real BetterAuth session token, not user ID
+// Previously returned null to rely on cookie, but cookie cross-port (3000->8000) may not be sent reliably
+// Real session token is random string (not ObjectId), so backend will treat as session lookup, not dev bypass
+// This fixes "Unauthorized: Authentication required" when customer clicks Request Repair
 export function useAuthToken(session: any): string | null {
-  return session?.user?.id || session?.user?._id || null;
+  // BetterAuth useSession returns { session, user } or { session: { token }, user: {...} }
+  // Try multiple shapes for compatibility
+  return (
+    session?.session?.token ||
+    session?.token ||
+    session?.data?.session?.token ||
+    null
+  );
 }
 
 // === Users API ===
@@ -251,8 +265,11 @@ export const uploadApi = {
       });
     } catch (err: any) {
       if (err instanceof TypeError && err.message.includes("Failed to fetch")) {
+        if (process.env.NODE_ENV === "development") {
+          console.error(`[uploadApi] Network error ${url}:`, err);
+        }
         throw {
-          message: `Upload backend not reachable at ${url}. Ensure backend running on 8000 and disable extensions blocking fetch (frame_ant). Original: ${err.message}`,
+          message: `Upload service not reachable. Please try again.`,
           status: 0,
           error: err,
         } as ApiError;
