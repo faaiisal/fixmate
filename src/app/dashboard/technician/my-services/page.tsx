@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { CardContainer } from "@/components/ui/card-container";
+import { LoadingState } from "@/components/modules/loading-state";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -285,7 +286,7 @@ export default function Page() {
       )}
 
       {loading ? (
-        <CardContainer className="p-8 text-center text-sm text-[#8C9098]">Loading your services from backend...</CardContainer>
+        <CardContainer className="p-8"><LoadingState label="Loading your services" /></CardContainer>
       ) : services.length === 0 ? (
         <CardContainer className="p-8 text-center text-[#8C9098]">No services yet. Create your first service — it will be pending approval per backend rules.</CardContainer>
       ) : (

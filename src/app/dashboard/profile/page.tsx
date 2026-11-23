@@ -5,6 +5,7 @@ import { CardContainer } from "@/components/ui/card-container";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { LoadingState } from "@/components/modules/loading-state";
 import { usersApi, uploadApi, useAuthToken } from "@/lib/api";
 import { useSession } from "@/lib/auth-client";
 import { toast } from "sonner";
@@ -89,7 +90,7 @@ export default function Page() {
   };
 
   if (loading) {
-    return <CardContainer className="p-8 text-center text-sm text-[#8C9098]">Loading profile from backend /api/users/profile...</CardContainer>;
+    return <CardContainer className="p-8"><LoadingState label="Loading profile" /></CardContainer>;
   }
 
   return (

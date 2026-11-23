@@ -157,8 +157,8 @@ export function NavbarMobile({
           )}
 
           <div className="flex items-center justify-center gap-2 pt-2 text-[10px] font-mono text-[#8C9098]">
-            <span className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse" />
-            SYSTEM OPERATIONAL 99.98%
+            <span className="w-2 h-2 rounded-full bg-[#10B981]" />
+            FIXMATE SERVICE PLATFORM
           </div>
         </div>
       </SheetContent>

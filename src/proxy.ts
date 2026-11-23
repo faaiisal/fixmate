@@ -2,11 +2,12 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 /**
- * Phase 6: Protect dashboard routes
- * - Logged-out user redirected to /sign-in
- * - Role-based redirects handled in dashboard layout (client) for precise role check via useSession
- * - This middleware checks session cookie existence as proxy for logged-in state
- *   Real session verification happens via BetterAuth DB lookup in layout and backend requireAuth
+ * Optimistic dashboard guard only.
+ * - Logged-out users without a session cookie are redirected to /sign-in early.
+ * - Cookie presence is NOT proof of authentication. The real session is verified
+ *   server-side by src/lib/server-auth.ts (BetterAuth auth.api.getSession) in the
+ *   dashboard layouts, followed by per-role layout gates.
+ * - The backend API remains the final authorization boundary for all data.
  */
 
 const DASHBOARD_PATHS = ["/dashboard"];
@@ -26,7 +27,7 @@ function hasSessionCookie(req: NextRequest): boolean {
   return false;
 }
 
-export async function middleware(req: NextRequest) {
+export function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const isDashboard = DASHBOARD_PATHS.some((p) => pathname.startsWith(p));
 
@@ -44,8 +45,8 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(signInUrl);
   }
 
-  // Session exists — allow request, role-based redirect will be handled in dashboard layout
-  // using useSession() which has role, and will redirect to own dashboard if mismatch
+  // A cookie exists, so continue. The dashboard server layouts verify the real
+  // session and role before rendering any protected content.
   return NextResponse.next();
 }
 

@@ -4,6 +4,7 @@ import { useEffect, useState, use } from "react";
 import { CardContainer } from "@/components/ui/card-container";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/modules/status-badge";
+import { LoadingState } from "@/components/modules/loading-state";
 import { bookingsApi, paymentsApi, useAuthToken } from "@/lib/api";
 import { useSession } from "@/lib/auth-client";
 import { toast } from "sonner";
@@ -84,8 +85,8 @@ export default function BookingDetailsPage({ params }: { params: { id: string } 
 
   if (loading) {
     return (
-      <CardContainer className="p-8 text-center text-sm text-[#8C9098]">
-        Loading booking details from backend...
+      <CardContainer className="p-8">
+        <LoadingState label="Loading booking details" />
       </CardContainer>
     );
   }

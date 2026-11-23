@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { CardContainer } from "@/components/ui/card-container";
+import { LoadingState } from "@/components/modules/loading-state";
 import { paymentsApi, useAuthToken } from "@/lib/api";
 import { useSession } from "@/lib/auth-client";
 import { toast } from "sonner";
@@ -39,7 +40,7 @@ export default function Page() {
         {stats && <div className="mt-3 text-sm">Total Paid Volume: <span className="font-bold">{formatCurrency(stats.totalAmount || 0)}</span> {stats.totalAmount ? "(from paid payments)" : ""}</div>}
       </div>
 
-      {loading ? <CardContainer className="p-8 text-center text-sm text-[#8C9098]">Loading transactions...</CardContainer> :
+      {loading ? <CardContainer className="p-8"><LoadingState label="Loading transactions" /></CardContainer> :
         payments.length === 0 ? <CardContainer className="p-8 text-center text-[#8C9098]">No transactions yet. Completed bookings need verified payments.</CardContainer> :
           <div className="space-y-3">
             {payments.map((p: any) => (

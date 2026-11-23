@@ -2,11 +2,13 @@
 
 import { useEffect, useState, use } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { CardContainer } from "@/components/ui/card-container";
 import { TelemetryBadge } from "@/components/ui/telemetry-badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { LoadingState } from "@/components/modules/loading-state";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { servicesApi, bookingsApi, useAuthToken } from "@/lib/api";
 import { useSession } from "@/lib/auth-client";
@@ -93,21 +95,8 @@ export default function ServiceDetailsPage({ params }: { params: { id: string } 
     } catch (err: any) {
       console.error("Failed to fetch service details:", err);
       setError(err.message || "Failed to load service");
-      // Fallback for UI preservation - sanitized, no path leak
-      setService({
-        _id: id,
-        title: "Service Details",
-        description: "This service information is currently unavailable. Please retry later.",
-        basePrice: 100,
-        category: "General",
-        approvalStatus: "approved",
-        isAvailable: true,
-        serviceMode: "doorstep",
-        serviceArea: "Dhaka, Bangladesh",
-        image: "",
-        estimatedDuration: "2 hours",
-        technicianId: "fallback",
-      });
+      // Never fabricate a service record when the API fails.
+      setService(null);
       toast.error(err.message || "Failed to load service");
     } finally {
       setLoading(false);
@@ -170,17 +159,40 @@ export default function ServiceDetailsPage({ params }: { params: { id: string } 
 
   if (loading) {
     return (
-      <div className="max-w-7xl mx-auto px-4 py-12 text-center text-sm text-[#8C9098]">
-        Loading service details...
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <CardContainer className="p-8">
+          <LoadingState label="Loading service details" />
+        </CardContainer>
       </div>
     );
   }
 
-  const displayTitle = service?.title || "Service Not Found";
-  const displayPrice = service?.basePrice ? `$${service.basePrice}` : "$100";
-  const displayCategory = service?.category || "Service";
+  if (!service) {
+    return (
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <CardContainer className="p-8 text-center" role="alert">
+          <div className="w-14 h-14 rounded-2xl bg-[#FFF1EC] border border-[#FFD6C2] flex items-center justify-center mx-auto mb-4 text-2xl" aria-hidden="true">⚠️</div>
+          <h1 className="font-heading text-2xl font-bold">Service unavailable</h1>
+          <p className="mt-2 text-sm text-[#55595F]">{error || "This service could not be loaded."}</p>
+          <p className="mt-1 text-xs text-[#8C9098]">No placeholder service details are displayed.</p>
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+            <Button type="button" className="bg-[#F26A36] hover:bg-[#E05824]" onClick={fetchService}>
+              Retry
+            </Button>
+            <Button asChild variant="outline">
+              <Link href="/services">Back to services</Link>
+            </Button>
+          </div>
+        </CardContainer>
+      </div>
+    );
+  }
+
+  const displayTitle = service.title || "Service";
+  const displayPrice = typeof service.basePrice === "number" ? `$${service.basePrice}` : "Not set";
+  const displayCategory = service.category || "Service";
   const localImage = getLocalImageForService(service);
-  const hasRemoteImage = service?.image && service.image.startsWith("http") && !imageError;
+  const hasRemoteImage = service.image && service.image.startsWith("http") && !imageError;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -188,28 +200,14 @@ export default function ServiceDetailsPage({ params }: { params: { id: string } 
         <span>HOME</span>/<span>SERVICES</span>/<span className="text-[#14121B] truncate max-w-[200px]">{displayTitle.slice(0, 30)}</span>
       </div>
 
-      {error && (
-        <CardContainer className="p-4 mb-6 bg-[#FFFBEB] border-[#FDE68A]">
-          <h4 className="font-semibold text-sm text-[#92400E]">Unable to load fresh data — Showing fallback</h4>
-          <p className="text-xs text-[#92400E] mt-1">Backend not reachable. Please retry.</p>
-          <Button variant="outline" size="sm" className="mt-3" onClick={fetchService}>
-            Retry Fetch
-          </Button>
-        </CardContainer>
-      )}
-
       <div className="grid lg:grid-cols-12 gap-8">
         <div className="lg:col-span-7 space-y-6">
           <div className="flex flex-wrap gap-2">
             <TelemetryBadge type="info" label={displayCategory.toUpperCase()} mono />
-            <TelemetryBadge type="success" label={service?.serviceMode ? `${service.serviceMode.toUpperCase()} VISIT` : "DOORSTEP VISIT"} mono />
-            <span className="px-2.5 py-1 rounded-full bg-[#F6F3F2] border border-[#E5E0DF] text-xs">★ 4.9 (128 reviews)</span>
-            <span className="px-2.5 py-1 rounded-full bg-[#ECFDF5] border border-[#A7F3D0] text-xs text-[#059669]">90-day Guarantee</span>
-            {service && (
-              <span className={`px-2.5 py-1 rounded-full text-xs border ${service.approvalStatus === "approved" ? "bg-[#ECFDF5] border-[#A7F3D0] text-[#059669]" : "bg-[#FFFBEB] border-[#FDE68A] text-[#92400E]"}`}>
-                {service.approvalStatus?.toUpperCase()} • {service.isAvailable ? "AVAILABLE" : "UNAVAILABLE"}
-              </span>
-            )}
+            <TelemetryBadge type="success" label={service.serviceMode ? `${service.serviceMode.toUpperCase()} VISIT` : "SERVICE MODE NOT SET"} mono />
+            <span className={`px-2.5 py-1 rounded-full text-xs border ${service.approvalStatus === "approved" ? "bg-[#ECFDF5] border-[#A7F3D0] text-[#059669]" : "bg-[#FFFBEB] border-[#FDE68A] text-[#92400E]"}`}>
+              {service.approvalStatus?.toUpperCase() || "STATUS UNKNOWN"} • {service.isAvailable ? "AVAILABLE" : "UNAVAILABLE"}
+            </span>
           </div>
 
           <h1 className="text-3xl font-bold font-heading">{displayTitle}</h1>
@@ -235,33 +233,27 @@ export default function ServiceDetailsPage({ params }: { params: { id: string } 
                 />
               )}
               <div className="absolute top-3 left-3 flex gap-2">
-                <span className="px-2 py-1 rounded-full bg-white/90 backdrop-blur text-[10px] font-mono border border-[#E5E0DF] shadow-sm">S/N: FX-APPL-8821</span>
-                <TelemetryBadge type="info" label="LIVE TELEMETRY" pulse mono />
+                <span className="px-2 py-1 rounded-full bg-white/90 backdrop-blur text-[10px] font-mono border border-[#E5E0DF] shadow-sm">{displayCategory.toUpperCase()}</span>
               </div>
               <div className="absolute bottom-3 right-3 px-2 py-1 rounded-full bg-black/70 text-white text-[10px] font-mono">
-                {hasRemoteImage ? "Backend ImgBB • Real Image" : "Local WebP Fallback • Category Matched"}
+                {hasRemoteImage ? "Uploaded service image" : "Category image fallback"}
               </div>
             </div>
           </CardContainer>
 
           <div className="grid md:grid-cols-2 gap-4">
             <CardContainer className="p-5">
-              <h3 className="font-semibold mb-3">Common Malfunctions</h3>
-              <ul className="space-y-2 text-sm text-[#55595F]">
-                <li>• Compressor failure - no cooling</li>
-                <li>• Ice maker not dispensing</li>
-                <li>• Water leakage</li>
-                <li>• Temperature fluctuation</li>
-              </ul>
+              <h3 className="font-semibold mb-3">Service Description</h3>
+              <p className="text-sm text-[#55595F] whitespace-pre-line">{service.description || "No description was provided for this service."}</p>
             </CardContainer>
             <CardContainer className="p-5">
-              <h3 className="font-semibold mb-3">Service Scope</h3>
+              <h3 className="font-semibold mb-3">Visit Details</h3>
               <ul className="space-y-2 text-sm text-[#55595F]">
-                <li>✓ OEM parts & warranty</li>
-                <li>✓ Doorstep diagnostic</li>
-                <li>✓ 90-day guarantee</li>
-                <li>✓ FixVault escrow</li>
-                <li>✓ {service?.serviceMode || "doorstep"} mode, {service?.serviceArea || "Dhaka, Bangladesh"}</li>
+                <li>• Service mode: {service.serviceMode || "Not specified"}</li>
+                <li>• Service area: {service.serviceArea || "Not specified"}</li>
+                <li>• Estimated duration: {service.estimatedDuration || "Not specified"}</li>
+                <li>• Availability: {service.isAvailable ? "Currently available" : "Unavailable"}</li>
+                <li>• Payment: confirmed server-side after completion</li>
               </ul>
             </CardContainer>
           </div>
@@ -269,27 +261,29 @@ export default function ServiceDetailsPage({ params }: { params: { id: string } 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
               { label: "Starting Price", value: displayPrice },
-              { label: "SLA", value: "24h" },
-              { label: "Warranty", value: "90 days" },
-              { label: "Response", value: service?.estimatedDuration || "2h avg" },
+              { label: "Service Mode", value: service.serviceMode || "Not set" },
+              { label: "Service Area", value: service.serviceArea || "Not set" },
+              { label: "Duration", value: service.estimatedDuration || "Not set" },
             ].map((s) => (
               <CardContainer key={s.label} className="p-4 text-center">
                 <div className="text-xs font-mono text-[#8C9098]">{s.label}</div>
-                <div className="font-bold text-[#14121B]">{s.value}</div>
+                <div className="font-bold text-[#14121B] break-words">{s.value}</div>
               </CardContainer>
             ))}
           </div>
 
           <CardContainer className="p-5">
-            <h3 className="font-semibold mb-3">Technician Dossier</h3>
+            <h3 className="font-semibold mb-3">Assigned Technician</h3>
             <div className="flex gap-3">
-              <div className="w-12 h-12 rounded-full bg-[#F6F3F2] border border-[#E5E0DF] flex items-center justify-center">MV</div>
+              <div className="w-12 h-12 rounded-full bg-[#F6F3F2] border border-[#E5E0DF] flex items-center justify-center">
+                {(service.technicianName || "T").charAt(0).toUpperCase()}
+              </div>
               <div>
-                <div className="font-medium">
-                  {service?.technicianId ? `Technician ${service.technicianId.toString().slice(-6)}` : "Marcus Vance • Master Certified • 4.97 ★"}
+                <div className="font-medium">{service.technicianName || "Assigned after the booking is accepted"}</div>
+                <div className="text-xs text-[#8C9098]">Service area: {service.serviceArea || "Not specified"}</div>
+                <div className="mt-2 text-sm text-[#55595F]">
+                  Technician contact details become available in your booking after the request is accepted.
                 </div>
-                <div className="text-xs text-[#8C9098]">Sector: {service?.serviceArea || "Dhaka, Bangladesh"} • Van #14 • 1.4mi away</div>
-                <div className="mt-2 text-sm text-[#55595F]">15+ years appliance repair, Samsung OEM certified, Fluke & Rigol calibrated bench.</div>
               </div>
             </div>
           </CardContainer>
@@ -383,7 +377,7 @@ export default function ServiceDetailsPage({ params }: { params: { id: string } 
                       <Textarea placeholder="Describe the issue... at least 10 chars" className="mt-1" value={fault} onChange={(e) => setFault(e.target.value)} />
                     </div>
                     <div className="p-3 rounded-lg bg-[#FFFBEB] border border-[#FDE68A] text-xs text-[#92400E]">
-                      <strong>FixVault Protection:</strong> $2M bonded escrow, 90-day warranty, real-time tracking. Pay only after completion.
+                      <strong>Status tracking:</strong> follow Requested → Accepted → In progress → Completed → Paid. Payment is confirmed server-side and is only available after the repair is completed.
                     </div>
                     <Button className="w-full bg-[#F26A36] hover:bg-[#E05824] h-12 text-base" onClick={handleBooking} disabled={bookingLoading || !service}>
                       {bookingLoading ? "Requesting..." : "Confirm & Request Repair →"}

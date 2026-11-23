@@ -1,19 +1,9 @@
 import Link from "next/link";
-import Image, { StaticImageData } from "next/image";
+import Image from "next/image";
 import { CardContainer } from "@/components/ui/card-container";
 import { TelemetryBadge } from "@/components/ui/telemetry-badge";
+import { getCategoryImage } from "@/lib/category-image";
 import { formatCurrency } from "@/lib/utils";
-
-// Local WebP category images from src/app/images/ (all .webp per requirement)
-// Clean: only canonical backend categories (7) + fallback
-import refrigeratorImg from "@/app/images/refrigerator.webp";
-import washingMachineImg from "@/app/images/washing-machine.webp";
-import laptopImg from "@/app/images/laptop.webp";
-import smartphoneImg from "@/app/images/smartphone.webp";
-import acImg from "@/app/images/ac.webp";
-import tvImg from "@/app/images/tv.webp";
-import electricalImg from "@/app/images/electrical-appliances.webp";
-import toolsImg from "@/app/images/tools.webp";
 
 interface ServiceCardProps {
   id: string;
@@ -25,35 +15,6 @@ interface ServiceCardProps {
   technician?: { name: string; rating: number; verified?: boolean };
   status?: "pending" | "approved" | "rejected";
   available?: boolean;
-}
-
-// Category → local WebP image mapping (canonical only - clean architecture)
-// Backend canonical categories: Refrigerator, Washing Machine, Laptop & PC, Smartphone, Air Conditioner, Television, Electrical Appliances
-// Removed duplicates: Laptop (→ Laptop & PC), AC (→ Air Conditioner), TV (→ Television) — 0 data when clicked
-const categoryImageMap: Record<string, StaticImageData> = {
-  refrigerator: refrigeratorImg,
-  "washing machine": washingMachineImg,
-  "laptop & pc": laptopImg,
-  smartphone: smartphoneImg,
-  "air conditioner": acImg,
-  television: tvImg,
-  "electrical appliances": electricalImg,
-};
-
-function getCategoryImage(category: string): StaticImageData {
-  const key = category.trim().toLowerCase();
-  // Direct canonical match
-  if (categoryImageMap[key]) return categoryImageMap[key];
-  // Fallback partial match for robustness
-  if (key.includes("refrigerator")) return refrigeratorImg;
-  if (key.includes("washing")) return washingMachineImg;
-  if (key.includes("laptop") || key.includes("desktop") || key.includes("pc")) return laptopImg;
-  if (key.includes("smartphone") || key.includes("phone")) return smartphoneImg;
-  if (key.includes("air conditioner") || key.includes("ac")) return acImg;
-  if (key.includes("television") || key.includes("tv")) return tvImg;
-  if (key.includes("electrical")) return electricalImg;
-  // Ultimate fallback
-  return toolsImg;
 }
 
 export function ServiceCard({ id, title, description, price, category, image, technician, status, available = true }: ServiceCardProps) {

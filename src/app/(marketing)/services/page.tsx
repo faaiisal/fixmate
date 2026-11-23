@@ -9,12 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { servicesApi } from "@/lib/api";
 
-// Fallback mock if backend not reachable (preserves UI when backend down)
-const mockServices = [
-  { id: "1", title: "Samsung Refrigerator Repair", description: "Compressor replacement & refrigerant recharge", price: 280, category: "Refrigerator", technician: { name: "Marcus Vance", rating: 4.97, verified: true }, status: "approved" as const, available: true },
-  { id: "2", title: "LG Washing Machine Drum Fix", description: "Bearing & seal replacement", price: 120, category: "Washing Machine", technician: { name: "Sarah Chen", rating: 4.9, verified: true }, status: "approved" as const, available: true },
-];
-
 type SortOption = "newest" | "price_asc" | "price_desc";
 
 export default function ServicesPage() {
@@ -28,13 +22,15 @@ export default function ServicesPage() {
   const initialMode = searchParams.get("serviceMode") || "All";
   const initialSort = (searchParams.get("sort") as SortOption) || "newest";
 
-  const [services, setServices] = useState<any[]>(mockServices);
+  const [services, setServices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
   const [search, setSearch] = useState(initialSearch);
   const [category, setCategory] = useState<string>(initialCategory);
   const [serviceMode, setServiceMode] = useState<string>(initialMode);
   const [sort, setSort] = useState<SortOption>(initialSort);
-  const [liveCount, setLiveCount] = useState<number>(mockServices.length);
+  const [liveCount, setLiveCount] = useState<number>(0);
 
   // Clean architecture: only canonical backend categories (7) + All = 8
   const categories = ["All", "Refrigerator", "Washing Machine", "Laptop & PC", "Smartphone", "Air Conditioner", "Television", "Electrical Appliances"];
@@ -76,6 +72,7 @@ export default function ServicesPage() {
     async function fetchServices() {
       try {
         setLoading(true);
+        setError(null);
         const params: Record<string, string | number> = {
           limit: 50,
         };
@@ -117,16 +114,15 @@ export default function ServicesPage() {
           setServices(mapped);
           setLiveCount(backendServices.length);
         } else {
-          if (search || category !== "All" || serviceMode !== "All") {
-            setServices([]);
-            setLiveCount(0);
-          } else {
-            setServices([]);
-            setLiveCount(0);
-          }
+          setServices([]);
+          setLiveCount(0);
         }
-      } catch (err) {
-        console.warn("Failed to fetch public services, falling back to mock (backend may be down):", err);
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : "Unable to reach the services API.";
+        // Never render fabricated catalog records when the backend is down.
+        setServices([]);
+        setLiveCount(0);
+        setError(message);
       } finally {
         setLoading(false);
       }
@@ -135,7 +131,7 @@ export default function ServicesPage() {
     // Debounce search but also sync URL for persistence
     const debounce = setTimeout(fetchServices, 300);
     return () => clearTimeout(debounce);
-  }, [search, category, serviceMode, sort]);
+  }, [search, category, serviceMode, sort, reloadKey]);
 
   // Sync state from URL on mount for category card filtering /services?category=AC
   useEffect(() => {
@@ -156,8 +152,8 @@ export default function ServicesPage() {
         <span>HOME</span>
         <span>/</span>
         <span className="text-[#14121B]">SERVICES</span>
-        <span className="ml-2 px-2 py-0.5 rounded-full bg-[#E6FCFD] text-[#0891B2] border border-[#A5F3FC]">
-          LIVE: {liveCount} SERVICES {loading ? "(loading...)" : ""}
+        <span className="ml-2 px-2 py-0.5 rounded-full bg-[#E6FCFD] text-[#0891B2] border border-[#A5F3FC]" aria-live="polite">
+          {loading ? "LOADING SERVICES…" : `LIVE: ${liveCount} SERVICE${liveCount === 1 ? "" : "S"}`}
         </span>
       </div>
 
@@ -222,6 +218,8 @@ export default function ServicesPage() {
           {categories.map((cat) => (
             <button
               key={cat}
+              type="button"
+              aria-pressed={category === cat}
               onClick={() => {
                 setCategory(cat);
                 updateURL({ category: cat });
@@ -242,6 +240,8 @@ export default function ServicesPage() {
           {serviceModes.map((mode) => (
             <button
               key={mode}
+              type="button"
+              aria-pressed={serviceMode === mode}
               onClick={() => {
                 setServiceMode(mode);
                 updateURL({ serviceMode: mode });
@@ -264,7 +264,30 @@ export default function ServicesPage() {
       </CardContainer>
 
       {loading ? (
-        <div className="py-12 text-center text-sm text-[#8C9098]">Loading services from backend...</div>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6" aria-busy="true" aria-live="polite">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <CardContainer key={index} className="p-0 overflow-hidden">
+              <div className="h-40 w-full bg-[#F0ECE9] animate-pulse" />
+              <div className="p-6 space-y-4">
+                <div className="h-5 w-3/4 rounded bg-[#F0ECE9] animate-pulse" />
+                <div className="h-4 w-full rounded bg-[#F0ECE9] animate-pulse" />
+                <div className="h-4 w-2/3 rounded bg-[#F0ECE9] animate-pulse" />
+                <div className="h-10 w-full rounded bg-[#F0ECE9] animate-pulse" />
+              </div>
+            </CardContainer>
+          ))}
+          <span className="sr-only">Loading services</span>
+        </div>
+      ) : error ? (
+        <CardContainer className="p-8 text-center" role="alert">
+          <div className="w-14 h-14 rounded-2xl bg-[#FFF1EC] border border-[#FFD6C2] flex items-center justify-center mx-auto mb-4 text-2xl" aria-hidden="true">⚠️</div>
+          <h2 className="font-heading text-xl font-bold">Services are temporarily unavailable</h2>
+          <p className="mt-2 text-sm text-[#55595F]">{error}</p>
+          <p className="mt-1 text-xs text-[#8C9098]">No placeholder or mock services are displayed. Please retry in a moment.</p>
+          <Button type="button" className="mt-4 bg-[#F26A36] hover:bg-[#E05824]" onClick={() => setReloadKey((key) => key + 1)}>
+            Retry
+          </Button>
+        </CardContainer>
       ) : (
         <ServiceGrid services={services} />
       )}

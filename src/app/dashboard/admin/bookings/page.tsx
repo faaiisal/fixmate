@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { CardContainer } from "@/components/ui/card-container";
 import { StatusBadge } from "@/components/modules/status-badge";
+import { LoadingState } from "@/components/modules/loading-state";
 import { bookingsApi, useAuthToken } from "@/lib/api";
 import { useSession } from "@/lib/auth-client";
 import { toast } from "sonner";
@@ -46,7 +47,7 @@ export default function Page() {
         </div>
       </div>
 
-      {loading ? <CardContainer className="p-8 text-center text-sm text-[#8C9098]">Loading all bookings...</CardContainer> :
+      {loading ? <CardContainer className="p-8"><LoadingState label="Loading all bookings" /></CardContainer> :
         bookings.length === 0 ? <CardContainer className="p-8 text-center text-[#8C9098]">No bookings found</CardContainer> :
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {bookings.map((b: any) => (

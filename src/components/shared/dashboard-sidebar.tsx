@@ -151,7 +151,7 @@ export function DashboardSidebar({ role: propRole = "customer" as Role }) {
           </div>
         </div>
 
-        <div className="text-[10px] font-mono text-[#8C9098] text-center">TX: 0x8F2A...991C • TLS 1.3</div>
+        <div className="text-[10px] font-mono text-[#8C9098] text-center">SESSION VERIFIED SERVER-SIDE</div>
       </div>
     </div>
   );

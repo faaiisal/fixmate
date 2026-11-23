@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { CardContainer } from "@/components/ui/card-container";
 import { StatCard } from "@/components/modules/stat-card";
+import { LoadingState } from "@/components/modules/loading-state";
 import { servicesApi, bookingsApi, useAuthToken } from "@/lib/api";
 import { useSession } from "@/lib/auth-client";
 
@@ -43,15 +44,15 @@ export default function Page() {
       </div>
 
       <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        <StatCard title="My Services" value={loading ? "..." : String(myServices.length)} subtitle={`${pendingServices} pending approval`} trend="Live" trendType="positive" />
-        <StatCard title="Active Requests" value={loading ? "..." : String(active)} subtitle="Assigned" trend="Live" trendType="positive" />
-        <StatCard title="Completed Repairs" value={loading ? "..." : String(completed)} subtitle="Lifetime" trend={`+${completed}`} trendType="positive" />
-        <StatCard title="Fix Rate" value={myServices.length > 0 ? "98%" : "N/A"} subtitle="Avg" trend="3 Active" trendType="neutral" />
+        <StatCard title="My Services" value={String(myServices.length)} subtitle={`${pendingServices} pending approval`} trend="Live" trendType="positive" loading={loading} />
+        <StatCard title="Active Requests" value={String(active)} subtitle="Assigned" trend="Live" trendType="positive" loading={loading} />
+        <StatCard title="Completed Repairs" value={String(completed)} subtitle="Lifetime" trend={`+${completed}`} trendType="positive" loading={loading} />
+        <StatCard title="Fix Rate" value={myServices.length > 0 ? "98%" : "N/A"} subtitle="Avg" trend="3 Active" trendType="neutral" loading={loading} />
       </div>
 
       <CardContainer className="p-6">
         <h3 className="font-semibold mb-3">Today Dispatches — Live from Backend</h3>
-        {loading ? <div className="text-sm text-[#8C9098]">Loading...</div> :
+        {loading ? <LoadingState label="Loading today's dispatches" /> :
           assigned.slice(0, 5).map((b: any) => (
             <div key={b._id} className="flex items-center justify-between p-3 rounded-xl border border-[#E5E0DF] mb-2">
               <div>
