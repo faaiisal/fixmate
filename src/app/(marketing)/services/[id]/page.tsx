@@ -299,49 +299,99 @@ export default function ServiceDetailsPage({ params }: { params: { id: string } 
           <div className="sticky top-24 space-y-4">
             <CardContainer className="p-6">
               <h3 className="font-semibold mb-4">Book This Service — Backend Integrated</h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="text-xs font-mono text-[#8C9098]">PHONE • DISPATCH SMS SECURED</label>
-                  <Input placeholder="+1 (555) 000-0000" className="mt-1" value={phone} onChange={(e) => setPhone(e.target.value)} />
-                </div>
-                <div>
-                  <label className="text-xs font-mono text-[#8C9098]">SERVICE ADDRESS</label>
-                  <Input placeholder="742 Montgomery St, San Francisco" className="mt-1" value={address} onChange={(e) => setAddress(e.target.value)} />
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="text-xs font-mono text-[#8C9098]">DATE</label>
-                    <Select value={date} onValueChange={(v) => setDate(v || "tomorrow")}>
-                      <SelectTrigger className="mt-1"><SelectValue placeholder="Select date" /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="today">Today</SelectItem>
-                        <SelectItem value="tomorrow">Tomorrow</SelectItem>
-                      </SelectContent>
-                    </Select>
+              {/* Role-aware booking - per Phase 8D */}
+              {(() => {
+                const userRole = (session as any)?.user?.role as string | undefined;
+                const isUnauth = !session;
+                const isCustomer = userRole === "customer";
+                const isTechnician = userRole === "technician";
+                const isAdmin = userRole === "admin";
+
+                if (isUnauth) {
+                  return (
+                    <div className="space-y-4 text-center py-4">
+                      <p className="text-sm text-[#55595F]">Please sign in as a customer to request a repair.</p>
+                      <Button className="w-full bg-[#F26A36]" onClick={() => router.push("/sign-in")}>
+                        Sign In to Book →
+                      </Button>
+                      <div className="text-[10px] font-mono text-[#8C9098]">Public browsing allowed, booking requires customer authentication</div>
+                    </div>
+                  );
+                }
+
+                if (isTechnician) {
+                  return (
+                    <div className="space-y-4 text-center py-4">
+                      <div className="p-3 rounded-lg bg-[#F6F3F2] border border-[#E5E0DF] text-xs text-[#55595F]">
+                        <strong>Technician Account:</strong> You cannot request repairs for your own or other technicians' services. Please switch to a customer account to book.
+                      </div>
+                      <Button variant="outline" className="w-full" onClick={() => router.push("/dashboard/technician")}>
+                        Go to Technician Dashboard
+                      </Button>
+                    </div>
+                  );
+                }
+
+                if (isAdmin) {
+                  return (
+                    <div className="space-y-4 text-center py-4">
+                      <div className="p-3 rounded-lg bg-[#F6F3F2] border border-[#E5E0DF] text-xs text-[#55595F]">
+                        <strong>Admin Account:</strong> Admins can inspect bookings and payment records but cannot create bookings, pay, or modify repair workflow. This is a platform administrator, not a customer.
+                      </div>
+                      <Button variant="outline" className="w-full" onClick={() => router.push("/dashboard/admin")}>
+                        Go to Admin Dashboard
+                      </Button>
+                    </div>
+                  );
+                }
+
+                // Customer - show full booking form
+                return (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-xs font-mono text-[#8C9098]">PHONE • DISPATCH SMS SECURED</label>
+                      <Input placeholder="+1 (555) 000-0000" className="mt-1" value={phone} onChange={(e) => setPhone(e.target.value)} />
+                    </div>
+                    <div>
+                      <label className="text-xs font-mono text-[#8C9098]">SERVICE ADDRESS</label>
+                      <Input placeholder="742 Montgomery St, San Francisco" className="mt-1" value={address} onChange={(e) => setAddress(e.target.value)} />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-xs font-mono text-[#8C9098]">DATE</label>
+                        <Select value={date} onValueChange={(v) => setDate(v || "tomorrow")}>
+                          <SelectTrigger className="mt-1"><SelectValue placeholder="Select date" /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="today">Today</SelectItem>
+                            <SelectItem value="tomorrow">Tomorrow</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <label className="text-xs font-mono text-[#8C9098]">TIME SLOT</label>
+                        <Select value={timeSlot} onValueChange={(v) => setTimeSlot(v || "morning")}>
+                          <SelectTrigger className="mt-1"><SelectValue placeholder="Time" /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="morning">Morning 9-12</SelectItem>
+                            <SelectItem value="afternoon">Afternoon 12-5</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-xs font-mono text-[#8C9098]">FAULT DESCRIPTION</label>
+                      <Textarea placeholder="Describe the issue... at least 10 chars" className="mt-1" value={fault} onChange={(e) => setFault(e.target.value)} />
+                    </div>
+                    <div className="p-3 rounded-lg bg-[#FFFBEB] border border-[#FDE68A] text-xs text-[#92400E]">
+                      <strong>FixVault Protection:</strong> $2M bonded escrow, 90-day warranty, real-time tracking. Pay only after completion.
+                    </div>
+                    <Button className="w-full bg-[#F26A36] hover:bg-[#E05824] h-12 text-base" onClick={handleBooking} disabled={bookingLoading || !service}>
+                      {bookingLoading ? "Requesting..." : "Confirm & Request Repair →"}
+                    </Button>
+                    <div className="text-center text-[10px] font-mono text-[#8C9098]">ESCROW HOLD SECURED • TLS 1.3 — Only customer owns this booking, cancel only while requested</div>
                   </div>
-                  <div>
-                    <label className="text-xs font-mono text-[#8C9098]">TIME SLOT</label>
-                    <Select value={timeSlot} onValueChange={(v) => setTimeSlot(v || "morning")}>
-                      <SelectTrigger className="mt-1"><SelectValue placeholder="Time" /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="morning">Morning 9-12</SelectItem>
-                        <SelectItem value="afternoon">Afternoon 12-5</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                <div>
-                  <label className="text-xs font-mono text-[#8C9098]">FAULT DESCRIPTION</label>
-                  <Textarea placeholder="Describe the issue... at least 10 chars" className="mt-1" value={fault} onChange={(e) => setFault(e.target.value)} />
-                </div>
-                <div className="p-3 rounded-lg bg-[#FFFBEB] border border-[#FDE68A] text-xs text-[#92400E]">
-                  <strong>FixVault Protection:</strong> $2M bonded escrow, 90-day warranty, real-time tracking. Pay only after completion.
-                </div>
-                <Button className="w-full bg-[#F26A36] hover:bg-[#E05824] h-12 text-base" onClick={handleBooking} disabled={bookingLoading || !service}>
-                  {bookingLoading ? "Requesting..." : "Confirm & Request Repair →"}
-                </Button>
-                <div className="text-center text-[10px] font-mono text-[#8C9098]">ESCROW HOLD SECURED • TLS 1.3</div>
-              </div>
+                );
+              })()}
             </CardContainer>
           </div>
         </div>

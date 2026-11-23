@@ -57,12 +57,13 @@ ALLOW_USERID_BEARER=false
 ```
 
 ## Admin Login
-Seeded accounts (default password `Password123!` hashed via BetterAuth scrypt, safe to run seed again):
-- **Admin:** `admin1@epyra.com` / `smithadmin@epyra.com` — role admin, created via seed/manual, cannot self-register as admin (server enforces via databaseHooks + watcher)
-- **Technician:** `technician.seed1@fixmate.dev` / `technician.seed2@fixmate.dev` / `mobarak@epyra.com`
-- **Customer:** `customer.seed1@fixmate.dev` / `customer.seed2@fixmate.dev` / `robart@epyra.com`
+- **Current Admin (production DB):** `admin@epyra.com` — role `admin`, manually provisioned in MongoDB `user` collection, credential in `account` collection. Password is privately configured in the database and is **not** a published default credential.
+- **Technician (seeded, default password `Password123!` hashed via BetterAuth scrypt, safe to run seed again):** `technician.seed1@fixmate.dev` / `technician.seed2@fixmate.dev` / `mobarak@epyra.com`
+- **Customer (seeded, default password `Password123!`):** `customer.seed1@fixmate.dev` / `customer.seed2@fixmate.dev` / `robart@epyra.com`
 
-Public signup only allows `customer` or `technician` — even crafted `role:admin` request is forced to customer via server `databaseHooks`.
+Deleted Admin accounts: `admin1@epyra.com` and `smithadmin@epyra.com` are no longer present in MongoDB.
+
+Public signup only allows `customer` or `technician` — even crafted `role:admin` request is forced to customer via server `databaseHooks`. Admin role remains valid for manually provisioned accounts like `admin@epyra.com`.
 
 ## Key Features Implemented (Phase 1-6)
 - BetterAuth + MongoDB adapter, session cookie `better-auth.session_token`, 7 days expiry, databaseHooks role sanitization, watcher downgrades admin inserts.

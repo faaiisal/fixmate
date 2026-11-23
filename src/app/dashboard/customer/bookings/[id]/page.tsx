@@ -16,6 +16,8 @@ export default function BookingDetailsPage({ params }: { params: { id: string } 
 
   const { data: session } = useSession();
   const token = useAuthToken(session);
+  const sessionUser = session as any;
+  const role = sessionUser?.user?.role || sessionUser?.role || "customer";
   const router = useRouter();
 
   const [booking, setBooking] = useState<any>(null);
@@ -44,6 +46,10 @@ export default function BookingDetailsPage({ params }: { params: { id: string } 
 
   const handleCancel = async () => {
     if (!token || !booking) return;
+    if (role !== "customer") {
+      toast.error("Only customers can cancel bookings");
+      return;
+    }
     if (!confirm("Cancel this booking? Only requested bookings can be cancelled.")) return;
     try {
       await bookingsApi.cancel(token, booking._id);
@@ -56,6 +62,10 @@ export default function BookingDetailsPage({ params }: { params: { id: string } 
 
   const handlePay = async () => {
     if (!token || !booking) return;
+    if (role !== "customer") {
+      toast.error("Only customers can pay for bookings");
+      return;
+    }
     setPayLoading(true);
     try {
       const res = await paymentsApi.createCheckout(token, booking._id);
@@ -248,13 +258,14 @@ export default function BookingDetailsPage({ params }: { params: { id: string } 
                 <strong>FixVault Protection:</strong> $2M bonded escrow, 90-day warranty. Pay only after completion.
               </div>
 
-              {booking.status === "requested" && (
+              {/* Only Customer should see cancellation and payment actions */}
+              {role === "customer" && booking.status === "requested" && (
                 <Button variant="outline" className="w-full text-[#ba1a1a] border-[#FECACA] hover:bg-[#FEF2F2]" onClick={handleCancel}>
                   Cancel Booking (Only Requested)
                 </Button>
               )}
 
-              {booking.status === "completed" && booking.paymentStatus !== "paid" && (
+              {role === "customer" && booking.status === "completed" && booking.paymentStatus !== "paid" && (
                 <Button className="w-full bg-[#F26A36] hover:bg-[#E05824]" onClick={handlePay} disabled={payLoading}>
                   {payLoading ? "Creating Checkout..." : `Pay Now ${booking.finalAmount ? formatCurrency(booking.finalAmount) : ""} →`}
                 </Button>
