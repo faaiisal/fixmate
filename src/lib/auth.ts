@@ -1,6 +1,7 @@
 import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "@better-auth/mongo-adapter";
 import { getDbSync } from "./db";
+import { sendEmail } from "./email";
 
 /**
  * FixMate BetterAuth Configuration
@@ -56,6 +57,43 @@ export const auth = betterAuth({
     requireEmailVerification: false, // Set true if you want to enforce verification
     minPasswordLength: 8,
     autoSignIn: true, // Auto sign in after sign-up
+    resetPasswordTokenExpiresIn: 3600, // 1 hour expiration for reset token (BetterAuth default 3600 seconds)
+
+    sendResetPassword: async ({ user, url, token }, request) => {
+      // Use FixMate branding, include BetterAuth-generated reset URL, explain why sent
+      // Never expose token separately from secure reset URL, never include existing password
+      // Never log passwords, reset tokens, or reset URLs
+      await sendEmail({
+        to: user.email,
+        subject: "Reset your FixMate password",
+        text: `You requested to reset your FixMate password.
+
+Click the following link to reset your password: ${url}
+
+This link will expire in 1 hour.
+
+If you did not request a password reset, you can safely ignore this email.
+
+FixMate Team
+Precision Appliance & Device Repair Platform`,
+        html: `
+          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #F26A36;">FixMate - Password Reset</h2>
+            <p>You requested to reset your FixMate password.</p>
+            <p><a href="${url}" style="background: #F26A36; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block;">Reset Password</a></p>
+            <p>Or copy and paste this link: ${url}</p>
+            <p><small>This link will expire in 1 hour. If you did not request a reset, you can safely ignore this email.</small></p>
+            <p><small>FixMate Team - Precision Appliance & Device Repair Platform</small></p>
+          </div>
+        `,
+      });
+    },
+
+    onPasswordReset: async ({ user }, request) => {
+      // Optional post-reset logic — preserve existing functionality
+      // Never log passwords, reset tokens, or reset URLs
+      console.log(`[FixMate] Password reset successful for user ${user.email}`);
+    },
   },
 
   // Social Providers - only include if env vars are set to avoid 500 on missing credentials

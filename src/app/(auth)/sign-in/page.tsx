@@ -140,8 +140,8 @@ export default function SignInPage() {
                   </FormItem>
                 )}
               />
-              <Link href="#" className="text-xs text-[#F26A36]">
-                Forgot key?
+              <Link href="/forgot-password" className="text-xs text-[#F26A36] hover:underline">
+                Forgot password?
               </Link>
             </div>
 
