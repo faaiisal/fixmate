@@ -26,35 +26,6 @@ npm install
 npm run dev # http://localhost:8000
 ```
 
-## Environment Variables
-
-**Frontend `.env.example` required vars (names only, never commit real values):**
-```
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-NEXT_PUBLIC_API_URL=http://localhost:8000/api
-BETTER_AUTH_URL=http://localhost:3000
-BETTER_AUTH_SECRET=generate-with-openssl-rand-base64-32
-MONGODB_URI=mongodb+srv://...
-MONGODB_DB=fixmatedb
-GOOGLE_CLIENT_ID=
-GOOGLE_CLIENT_SECRET=
-```
-
-**Backend `.env.example` required vars:**
-```
-PORT=8000
-NODE_ENV=development
-MONGODB_URI=mongodb+srv://...
-DB_NAME=fixmatedb
-CLIENT_URL=http://localhost:3000
-BETTER_AUTH_SECRET=same-as-frontend
-BETTER_AUTH_URL=http://localhost:3000
-STRIPE_SECRET_KEY=sk_test_...
-STRIPE_WEBHOOK_SECRET=whsec_...
-STRIPE_CURRENCY=usd
-IMGBB_API_KEY=your_imgbb_key
-ALLOW_USERID_BEARER=false
-```
 
 ## Admin Login
 - **Current Admin (production DB):** `admin@epyra.com` — role `admin`, manually provisioned in MongoDB `user` collection, credential in `account` collection. Password is privately configured in the database and is **not** a published default credential.
