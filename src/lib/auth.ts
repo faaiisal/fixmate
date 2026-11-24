@@ -1,5 +1,6 @@
 import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "@better-auth/mongo-adapter";
+import type { Db, MongoClient } from "mongodb";
 import { getDbSync } from "./db";
 import { sendEmail } from "./email";
 
@@ -17,9 +18,13 @@ import { sendEmail } from "./email";
  * - GitHub OAuth
  */
 
-const { db, client } = getDbSync();
-
-export const auth = betterAuth({
+/**
+ * Build a BetterAuth instance against the given MongoDB handles.
+ * Constructed lazily via getAuth() (not at module scope) so a dead client
+ * topology is replaced instead of cached for the lifetime of the process.
+ */
+function createAuthInstance(db: Db, client: MongoClient) {
+  return betterAuth({
   appName: "FixMate",
 
   // Base URL: Use VERCEL_URL in production, fallback to envs, then localhost for dev
@@ -211,8 +216,31 @@ Precision Appliance & Device Repair Platform`,
       // joins: true, // Uncomment if you have replica set and want 2-3x performance
     },
   },
-});
+  });
+}
+
+export type AuthInstance = ReturnType<typeof createAuthInstance>;
+
+let cachedAuth: AuthInstance | null = null;
+let cachedAuthClient: MongoClient | null = null;
+
+/**
+ * Get the BetterAuth instance, rebuilding it when the underlying MongoDB
+ * client died (Atlas pause/outage). getDbSync() already drops closed
+ * topologies; the instance is rebuilt only when the client identity changed,
+ * so the steady-state path reuses a single instance exactly as before.
+ * Without this, one failed connection poisons auth with
+ * MongoTopologyClosedError until the deployment restarts.
+ */
+export function getAuth(): AuthInstance {
+  const { db, client } = getDbSync();
+  if (!cachedAuth || cachedAuthClient !== client) {
+    cachedAuth = createAuthInstance(db, client);
+    cachedAuthClient = client;
+  }
+  return cachedAuth;
+}
 
 // Export types for client usage
-export type Session = typeof auth.$Infer.Session;
-export type User = typeof auth.$Infer.Session.user;
+export type Session = AuthInstance["$Infer"]["Session"];
+export type User = AuthInstance["$Infer"]["Session"]["user"];

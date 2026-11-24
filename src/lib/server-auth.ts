@@ -3,7 +3,7 @@ import "server-only";
 import { cache } from "react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { auth } from "./auth";
+import { getAuth } from "./auth";
 
 export type AppRole = "customer" | "technician" | "admin";
 
@@ -25,7 +25,7 @@ export const getServerSession = cache(async () => {
   const requestHeaders = await headers();
 
   try {
-    return await auth.api.getSession({ headers: requestHeaders });
+    return await getAuth().api.getSession({ headers: requestHeaders });
   } catch (error) {
     console.error("[server-auth] Failed to verify BetterAuth session", error);
     return null;
