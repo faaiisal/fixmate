@@ -4,6 +4,7 @@ import { cache } from "react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getAuth } from "./auth";
+import { getDb } from "./db";
 
 export type AppRole = "customer" | "technician" | "admin";
 
@@ -25,6 +26,12 @@ export const getServerSession = cache(async () => {
   const requestHeaders = await headers();
 
   try {
+    try {
+      await getDb();
+    } catch (connErr) {
+      console.warn("[server-auth] MongoDB not ready for session verification:", (connErr as Error).message);
+      return null;
+    }
     return await getAuth().api.getSession({ headers: requestHeaders });
   } catch (error) {
     console.error("[server-auth] Failed to verify BetterAuth session", error);

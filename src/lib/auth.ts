@@ -1,7 +1,7 @@
 import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "@better-auth/mongo-adapter";
 import type { Db, MongoClient } from "mongodb";
-import { getDbSync } from "./db";
+import { getDbSync, isClientUsable } from "./db";
 import { sendEmail } from "./email";
 
 /**
@@ -221,24 +221,31 @@ Precision Appliance & Device Repair Platform`,
 
 export type AuthInstance = ReturnType<typeof createAuthInstance>;
 
-let cachedAuth: AuthInstance | null = null;
-let cachedAuthClient: MongoClient | null = null;
+interface FixMateAuthCache {
+  auth?: AuthInstance;
+  client?: MongoClient;
+}
+
+declare global {
+  var _fixmateAuth: FixMateAuthCache | undefined;
+}
+
+const authCache: FixMateAuthCache = globalThis._fixmateAuth || {};
+globalThis._fixmateAuth = authCache;
 
 /**
- * Get the BetterAuth instance, rebuilding it when the underlying MongoDB
- * client died (Atlas pause/outage). getDbSync() already drops closed
- * topologies; the instance is rebuilt only when the client identity changed,
- * so the steady-state path reuses a single instance exactly as before.
- * Without this, one failed connection poisons auth with
- * MongoTopologyClosedError until the deployment restarts.
+ * Get the BetterAuth instance, rebuilding it if the underlying MongoDB
+ * client died or changed. Uses globalThis cache to avoid unnecessary
+ * re-initialization and concurrent index recreation across requests.
  */
 export function getAuth(): AuthInstance {
   const { db, client } = getDbSync();
-  if (!cachedAuth || cachedAuthClient !== client) {
-    cachedAuth = createAuthInstance(db, client);
-    cachedAuthClient = client;
+  if (!authCache.auth || authCache.client !== client || !isClientUsable(client)) {
+    console.log("[FixMate Auth] Initializing Better Auth instance");
+    authCache.auth = createAuthInstance(db, client);
+    authCache.client = client;
   }
-  return cachedAuth;
+  return authCache.auth;
 }
 
 // Export types for client usage
